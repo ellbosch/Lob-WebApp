@@ -1,0 +1,9 @@
+.video_embed_streamable {
+	height: 400px;
+	width: 100%;
+}
+
+.video_embed_streamable iframe {
+	width: 100%;
+	height: 100%;
+}
