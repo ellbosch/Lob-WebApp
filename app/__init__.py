@@ -21,3 +21,6 @@ login_manager.init_app(application)
 login_manager.login_view = 'login'
 
 from app import views
+
+from app import admin
+admin.add('ellbosch')

@@ -1,4 +1,4 @@
-from app import application, login_manager, db, models, forms#, reddit
+from app import application, login_manager, db, models, forms
 from app.forms import LoginForm, RegistrationForm
 from app.models import *
 from flask import render_template, request, jsonify, flash, redirect, url_for, Markup
@@ -41,7 +41,9 @@ def register():
         return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data, firstname=form.firstname.data, lastname=form.lastname.data, email_authenticated=False)
+        user = User(username=form.username.data, email=form.email.data,
+        			firstname=form.firstname.data, lastname=form.lastname.data,
+        			email_authenticated=False, timestamp_created=datetime.utcnow())
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
