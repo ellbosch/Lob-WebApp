@@ -12,7 +12,8 @@
 		{% if current_user.is_authenticated %}
 			<p><span>Hi, {{ current_user.username }}!</span>&nbsp;<a href="{{ url_for('logout') }}">Log out</a></p>
 		{% else %}
-			<a href="{{ url_for('login') }}">Log in</a>
+			<p><a href="{{ url_for('login') }}">Log in</a></p>
+			<p><a href="{{ url_for('register') }}">Register</a></p>
 		{% endif %}
 	    {% block content %}{% endblock %}
 	</div>
