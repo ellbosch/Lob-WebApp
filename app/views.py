@@ -1,15 +1,15 @@
-from app import application, login_manager, db, models, forms
+from app import application, db, models, forms, user_datastore#, login_manager
 from app.forms import LoginForm, RegistrationForm
 from app.models import *
 from flask import render_template, request, jsonify, flash, redirect, url_for, Markup
-from flask_login import current_user, login_user, login_required, logout_user
-from werkzeug.urls import url_parse
+from flask_security import current_user, login_user, login_required, logout_user
+from flask_security.utils import hash_password, verify_and_update_password
 from datetime import datetime
 from sqlalchemy import desc
 import json
 
 
-@login_manager.user_loader
+@application.login_manager.user_loader
 def load_user(id):
 	return User.query.get(int(id))
 
@@ -24,7 +24,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
+        if verify_and_update_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
@@ -41,11 +41,12 @@ def register():
         return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data,
+        user_datastore.create_user(username=form.username.data, email=form.email.data,
+        			password=hash_password(form.password.data),
+        			# password=form.password.data,
         			firstname=form.firstname.data, lastname=form.lastname.data,
-        			email_authenticated=False, timestamp_created=datetime.utcnow())
-        user.set_password(form.password.data)
-        db.session.add(user)
+        			created_at=datetime.utcnow(), login_count=0)
+
         db.session.commit()
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('home_page'))
