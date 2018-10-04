@@ -49,9 +49,18 @@ class Namespace(enum.Enum):
     channel = 2
     event = 3
 
+# pages can be anything from categories, channels, and events
 class Page(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     namespace = db.Column(db.Enum(Namespace), nullable=False, index=True)
-    title = db.Column(db.String(255), unique=True, nullable=False)
+    title = db.Column(db.String(255), unique=True, index=True, nullable=False)
     redirect = db.Column(db.Boolean)
+    created_at = db.Column(db.DateTime, nullable=False)
+
+# category links are links FROM pages TO category pages (i.e. FROM Baseball TO Sports)
+class CategoryLink(db.Model):
+    # DOUBLE CHECK MEDIAWIKI FOR BACKREFS
+    id = db.Column(db.Integer, primary_key=True)
+    id_from = db.Column(db.Integer, db.ForeignKey('page.id'), index=True, nullable=False)   # page where link is located
+    id_to = db.Column(db.Integer, db.ForeignKey('page.id'), index=True, nullable=False)     # page where link sends to
     created_at = db.Column(db.DateTime, nullable=False)

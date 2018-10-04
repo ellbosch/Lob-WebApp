@@ -64,7 +64,6 @@ def register():
 ''' ************************************
 	ADMIN RIGHTS
 	************************************'''
-# @login_required
 @application.route('/category_submission', methods=['GET', 'POST'])
 @roles_accepted('admin', 'moderator')
 def category_submission():
@@ -72,8 +71,13 @@ def category_submission():
 
 	if form.validate_on_submit():
 		page = Page(namespace='category', title=form.category_title.data, created_at=datetime.utcnow())
-		# db.session.add(page)
-		# db.session.commit()
+		db.session.add(page)
+		db.session.commit()		# must first commit and flush page to fix foreign key constraint issue on categorylink
+		db.session.flush()
+
+		categorylink = CategoryLink(id_from=Page.query.filter_by(title=page.title).first().id, id_to=form.parent_category.data, created_at=datetime.utcnow())
+		db.session.add(categorylink)
+		db.session.commit()
 		flash('New category created!')
 		# REDIRECT TO NEW CATEGORY PAGE HERE AND FLASH MESSAGE
 
