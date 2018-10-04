@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Category Submission</h1>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.category_title.label }}<br>
+        {{ form.category_title(size=32) }}<br>
+        {% for error in form.category_title.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.parent_category.label }}<br>
+        {{ form.parent_category }}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+
+{% endblock %}

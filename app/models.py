@@ -53,5 +53,5 @@ class Page(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     namespace = db.Column(db.Enum(Namespace), nullable=False, index=True)
     title = db.Column(db.String(255), unique=True, nullable=False)
-    is_redirect = db.Column(db.Boolean, nullable=False)
-    timestamp_created = db.Column(db.DateTime, nullable=False)
+    redirect = db.Column(db.Boolean)
+    created_at = db.Column(db.DateTime, nullable=False)

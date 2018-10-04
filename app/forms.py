@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from app.models import *
 
@@ -22,9 +22,24 @@ class RegistrationForm(FlaskForm):
 	def validate_username(self, username):
 		user = User.query.filter_by(username=username.data).first()
 		if user is not None:
-			raise ValidationError('Please use a different username.')
+			raise ValidationError('Username already taken! Please use a different username.')
 
 	def validate_email(self, email):
 		user = User.query.filter_by(email=email.data).first()
 		if user is not None:
-			raise ValidationError('Please use a different email address.')
+			raise ValidationError('Email address already taken! Please use a different email.')
+
+class CategorySubmissionForm(FlaskForm):
+	# get all category options
+	entities = []
+	for entity in Page.query.filter_by(namespace='category').all():
+		entities.append((entity.id, entity.title))
+
+	category_title = StringField('New Category Title', validators=[DataRequired()])
+	parent_category = SelectField(label='Parent Category', choices=entities, coerce=int, validators=[DataRequired()])
+	submit = SubmitField('Submit')
+
+	def validate_category_title(self, category_title):
+		page = Page.query.filter_by(namespace='category', title=category_title.data).first()
+		if page is not None:
+			raise ValidationError('Category title already taken! Please use a different name.')
