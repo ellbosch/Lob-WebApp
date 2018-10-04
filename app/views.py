@@ -45,6 +45,7 @@ def login():
     return render_template('login.html', form=form)
 
 @application.route('/register', methods=['GET', 'POST'])
+@roles_accepted('admin', 'moderator')
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
