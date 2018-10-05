@@ -45,7 +45,7 @@ def login():
     return render_template('login.html', form=form)
 
 @application.route('/register', methods=['GET', 'POST'])
-@roles_accepted('admin', 'moderator')
+@roles_accepted('admin', 'moderator')						# DELETE THIS!
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -63,7 +63,7 @@ def register():
 
 
 ''' ************************************
-	ADMIN RIGHTS
+	CATEGORIES
 	************************************'''
 @application.route('/category_submission', methods=['GET', 'POST'])
 @roles_accepted('admin', 'moderator')
@@ -83,3 +83,26 @@ def category_submission():
 		# REDIRECT TO NEW CATEGORY PAGE HERE AND FLASH MESSAGE
 
 	return render_template('category_submission.html', title='Submit New Category', form=form)
+
+@application.route('/category/<page_title>/', methods=['GET'])
+def category_page(page_title):
+	page_exists = False 		# boolean used to track if the category page exsits
+	parent_categories = []		# array used to track parent categories for the queried category
+	subcategories = []
+	page = Page.query.filter_by(title=page_title).first()
+	
+	if page is not None:
+		page_exists = True
+
+		# get parent categories
+		links_parent_categories = CategoryLink.query.filter_by(id_from=page.id).all()
+		for link in links_parent_categories:
+			parent_categories.append(Page.query.get(link.id_to).title)
+
+		# get subcategories
+		links_subcategories = CategoryLink.query.filter_by(id_to=page.id).all()
+		for link in links_subcategories:
+			subcategories.append(Page.query.get(link.id_from).title)
+
+	return render_template('category_page.html', title=page_title, page_exists=page_exists,
+		parent_categories=parent_categories, subcategories=subcategories)
