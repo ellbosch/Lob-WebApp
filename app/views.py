@@ -68,7 +68,10 @@ def register():
 @application.route('/category_submission', methods=['GET', 'POST'])
 @roles_accepted('admin', 'moderator')
 def category_submission():
-	form = CategorySubmissionForm()
+	# get params, if there are any
+	name = request.args.get('name')
+
+	form = CategorySubmissionForm(request.args)
 
 	if form.validate_on_submit():
 		page = Page(namespace='category', title=form.category_title.data, created_at=datetime.utcnow())

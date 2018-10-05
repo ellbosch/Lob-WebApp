@@ -3,38 +3,36 @@
 {% block content %}
 <h1>{{ title }}</h1>
 
-{% if page_exists %}
-
-{% else %}
-
+{% if not page_exists %}
+	<p>No category made for <strong>{{ title }}</strong>! <a href="{{ url_for('category_submission', category_title=title) }}">Create one here.</a>
 {% endif %}
 <!-- show subcategories -->
 {% if subcategories|length > 0 %}
-<p>
-	Subcategories:
-	{% for cat in subcategories %}
-		<!-- append a comma if the list is still iterating -->
-		{% if loop.index != subcategories|length %}
-		<a href="{{ url_for('category_page', page_title=cat) }}">{{ cat }}</a>,
-		{% else %}
-		<a href="{{ url_for('category_page', page_title=cat) }}">{{ cat }}</a>
-		{% endif %}
-	{% endfor %}
-</p>
-{% endif %}
+	<p>
+		Subcategories:
+		{% for cat in subcategories %}
+			<!-- append a comma if the list is still iterating -->
+			{% if loop.index != subcategories|length %}
+				<a href="{{ url_for('category_page', page_title=cat) }}">{{ cat }}</a>,
+			{% else %}
+				<a href="{{ url_for('category_page', page_title=cat) }}">{{ cat }}</a>
+			{% endif %}
+		{% endfor %}
+	</p>
+	{% endif %}
 
-<!-- show parent categories -->
-{% if parent_categories|length > 0 %}
-<p>
-	Categories:
-	{% for cat in parent_categories %}
-		<!-- append a comma if the list is still iterating -->
-		{% if loop.index != parent_categories|length %}
-		<a href="{{ url_for('category_page', page_title=cat) }}">{{ cat }}</a>,
-		{% else %}
-		<a href="{{ url_for('category_page', page_title=cat) }}">{{ cat }}</a>
-		{% endif %}
-	{% endfor %}
-</p>
+	<!-- show parent categories -->
+	{% if parent_categories|length > 0 %}
+	<p>
+		Categories:
+		{% for cat in parent_categories %}
+			<!-- append a comma if the list is still iterating -->
+			{% if loop.index != parent_categories|length %}
+				<a href="{{ url_for('category_page', page_title=cat) }}">{{ cat }}</a>,
+			{% else %}
+				<a href="{{ url_for('category_page', page_title=cat) }}">{{ cat }}</a>
+			{% endif %}
+		{% endfor %}
+	</p>
 {% endif %}
 {% endblock %}
