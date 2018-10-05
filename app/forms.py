@@ -40,6 +40,11 @@ class CategorySubmissionForm(FlaskForm):
 	submit = SubmitField('Submit')
 
 	def validate_category_title(self, category_title):
+		# check if page contains invalid characters (like underscores)
+		if '_' in category_title.data:
+			raise ValidationError('Category title cannot contain underscores! Please replace underscores with spaces.')
+
+		# check if page is already made
 		page = Page.query.filter_by(namespace='category', title=category_title.data).first()
 		if page is not None:
 			raise ValidationError('Category title already taken! Please use a different name.')
