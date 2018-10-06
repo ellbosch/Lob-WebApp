@@ -32,11 +32,11 @@ class RegistrationForm(FlaskForm):
 class CategorySubmissionForm(FlaskForm):
 	# get all category options
 	entities = []
-	for entity in Page.query.filter_by(namespace='category').all():
-		entities.append((entity.id, entity.title))
+	for entity in Category.query.all():
+		entities.append((entity.title, entity.title))
 
 	category_title = StringField('New Category Title', validators=[DataRequired()])
-	parent_category = SelectField(label='Parent Category', choices=entities, coerce=int, validators=[DataRequired()])
+	parent_category = SelectField(label='Parent Category', choices=entities, coerce=str, validators=[DataRequired()])
 	submit = SubmitField('Submit')
 
 	def validate_category_title(self, category_title):
@@ -44,7 +44,7 @@ class CategorySubmissionForm(FlaskForm):
 		if '_' in category_title.data:
 			raise ValidationError('Category title cannot contain underscores! Please replace underscores with spaces.')
 
-		# check if page is already made
-		page = Page.query.filter_by(namespace='category', title=category_title.data).first()
+		# check if category is already made
+		page = Category.query.filter_by(title=category_title.data).first()
 		if page is not None:
 			raise ValidationError('Category title already taken! Please use a different name.')

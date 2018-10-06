@@ -73,18 +73,16 @@ def category_submission():
 	if request.method == 'POST':
 		form = CategorySubmissionForm()
 		if form.validate_on_submit():
-			page = Page(namespace='category', title=form.category_title.data, created_at=datetime.utcnow())
-			db.session.add(page)
-			db.session.commit()		# must first commit and flush page to fix foreign key constraint issue on categorylink
-			db.session.flush()
-
-			categorylink = CategoryLink(id_from=Page.query.filter_by(title=page.title).first().id, id_to=form.parent_category.data, created_at=datetime.utcnow())
+			category = Category(title=form.category_title.data, created_at=datetime.utcnow())
+			categorylink = LinkToCategory(title_from=category.title, namespace_from="category", title_to=form.parent_category.data,
+				created_at=datetime.utcnow())
+			db.session.add(category)
 			db.session.add(categorylink)
 			db.session.commit()
 			
 			# redirect to newly created category
 			flash('New category created!')
-			return redirect(url_for('category_page', page_title=page.title))
+			return redirect(url_for('category_page', page_title=category.title))
 	else:
 		# adds params to form, if provided
 		form = CategorySubmissionForm(request.args)
@@ -101,21 +99,21 @@ def category_page(page_title):
 	parent_categories = []					# array used to track parent categories for the queried category
 	subcategories = []
 	title = page_title.replace('_', ' ')	# replace underscores with spaces
-	page = Page.query.filter_by(title=title).first()
+	category_page = Category.query.filter_by(title=title).first()
 	
-	if page is not None:
+	if category_page is not None:
 		page_exists = True
-		title = page.title 	# fixes any capitalization errors
+		title = category_page.title 	# fixes any capitalization errors
 
 		# get parent categories
-		links_parent_categories = CategoryLink.query.filter_by(id_from=page.id).all()
+		links_parent_categories = LinkToCategory.query.filter_by(title_from=category_page.title).all()
 		for link in links_parent_categories:
-			parent_categories.append(Page.query.get(link.id_to).title)
+			parent_categories.append(link.title_to)
 
 		# get subcategories
-		links_subcategories = CategoryLink.query.filter_by(id_to=page.id).all()
+		links_subcategories = LinkToCategory.query.filter_by(title_to=category_page.title).all()
 		for link in links_subcategories:
-			subcategories.append(Page.query.get(link.id_from).title)
+			subcategories.append(link.title_from)
 
 	return render_template('category_page.html', title=title, page_exists=page_exists,
 		parent_categories=parent_categories, subcategories=subcategories)

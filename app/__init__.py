@@ -39,10 +39,9 @@ security = Security(application, user_datastore)
 # 					created_at=datetime.utcnow(), login_count=0)
 # 	db.session.commit()
 
-# DELETE DIS
-# sports category init
+# DELETE DIS: sports category init
 # from datetime import datetime
-# sports_cat = models.Page(namespace="category", title="Sports", created_at=datetime.utcnow())
+# sports_cat = models.Category(title="Sports", created_at=datetime.utcnow())
 # db.session.add(sports_cat)
 # db.session.commit()
 
