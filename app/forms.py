@@ -1,7 +1,13 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from app.models import *
+
+
+# get all category choices
+def get_category_choices():
+	return Category.query.all()
 
 
 class LoginForm(FlaskForm):
@@ -30,13 +36,10 @@ class RegistrationForm(FlaskForm):
 			raise ValidationError('Email address already taken! Please use a different email.')
 
 class CategorySubmissionForm(FlaskForm):
-	# get all category options
-	entities = []
-	for entity in Category.query.all():
-		entities.append((entity.title, entity.title))
-
 	category_title = StringField('New Category Title', validators=[DataRequired()])
-	parent_category = SelectField(label='Parent Category', choices=entities, coerce=str, validators=[DataRequired()])
+	parent_category = QuerySelectField(label='Parent Category',
+		query_factory=get_category_choices, get_label='title',
+		validators=[DataRequired()])
 	submit = SubmitField('Submit')
 
 	def validate_category_title(self, category_title):
@@ -48,3 +51,9 @@ class CategorySubmissionForm(FlaskForm):
 		page = Category.query.filter_by(title=category_title.data).first()
 		if page is not None:
 			raise ValidationError('Category title already taken! Please use a different name.')
+
+class ChannelCreationForm(FlaskForm):
+	category_for_channel = QuerySelectField(label='Make Channel for Category',
+		query_factory=get_category_choices, get_label='title',
+		validators=[DataRequired()])
+	submit = SubmitField('Submit')

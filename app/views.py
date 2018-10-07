@@ -1,5 +1,5 @@
 from app import application, db, models, forms, user_datastore#, login_manager
-from app.forms import LoginForm, RegistrationForm, CategorySubmissionForm
+from app.forms import LoginForm, RegistrationForm, CategorySubmissionForm, ChannelCreationForm
 from app.models import *
 from flask import render_template, request, jsonify, flash, redirect, url_for, Markup
 from flask_security import current_user, login_user, login_required, logout_user
@@ -74,12 +74,12 @@ def category_submission():
 		form = CategorySubmissionForm()
 		if form.validate_on_submit():
 			category = Category(title=form.category_title.data, created_at=datetime.utcnow())
-			categorylink = LinkToCategory(title_from=category.title, namespace_from="category", title_to=form.parent_category.data,
+			categorylink = LinkToCategory(title_from=category.title, namespace_from="category", title_to=form.parent_category.data.title,
 				created_at=datetime.utcnow())
 			db.session.add(category)
 			db.session.add(categorylink)
 			db.session.commit()
-			
+
 			# redirect to newly created category
 			flash('New category created!')
 			return redirect(url_for('category_page', page_title=category.title))
@@ -87,6 +87,27 @@ def category_submission():
 		# adds params to form, if provided
 		form = CategorySubmissionForm(request.args)
 	return render_template('category_submission.html', title='Submit New Category', form=form)
+
+# create channel from an existing category
+@application.route('/create_channel', methods=['GET', 'POST'])
+@roles_accepted('admin')
+def create_channel():
+	if request.method == 'POST':
+		form = ChannelCreationForm()
+		if form.validate_on_submit():
+			channel = Channel(id_cat=form.category_for_channel.data.id, created_at=datetime.utcnow())
+			db.session.add(channel)
+			db.session.commit()
+
+			title = form.category_for_channel.data.title
+
+			# redirect to newly created channel
+			flash('New channel created!')
+			return redirect(url_for('channel_page', page_title=title))
+	else:
+		# adds params to form, if provided
+		form = ChannelCreationForm(request.args)
+	return render_template('create_channel.html', title='Create Channel', form=form)
 
 # view for category page
 @application.route('/category/<page_title>/', methods=['GET'])
@@ -96,13 +117,19 @@ def category_page(page_title):
 		return redirect(url_for('category_page', page_title=page_title.replace(' ', '_')))
 
 	page_exists = False 					# boolean used to track if the category page exsits
+	is_channel = False
 	parent_categories = []					# array used to track parent categories for the queried category
 	subcategories = []
 	title = page_title.replace('_', ' ')	# replace underscores with spaces
 	category_page = Category.query.filter_by(title=title).first()
-	
+
 	if category_page is not None:
 		page_exists = True
+
+		# query to see if the category has a channel page
+		if Channel.query.filter_by(id_cat=category_page.id).first() is not None:
+			is_channel = True
+		
 		title = category_page.title 	# fixes any capitalization errors
 
 		# get parent categories
@@ -116,4 +143,41 @@ def category_page(page_title):
 			subcategories.append(link.title_from)
 
 	return render_template('category_page.html', title=title, page_exists=page_exists,
-		parent_categories=parent_categories, subcategories=subcategories)
+		is_channel=is_channel, parent_categories=parent_categories, subcategories=subcategories)
+
+# view for channel page
+@application.route('/channel/<page_title>/', methods=['GET'])
+@application.route('/<page_title>/', methods=['GET'])
+def channel_page(page_title):
+	# redirect if url has spaces (we convert them to underscores for friendlier urls)
+	if ' ' in page_title:
+		return redirect(url_for('channel_page', page_title=page_title.replace(' ', '_')))
+
+	parent_categories = []					# array used to track parent categories for the queried category
+	subcategories = []
+	title = page_title.replace('_', ' ')	# replace underscores with spaces
+	
+	# look for the category page of the channel, which contains the metadata
+	category_page = Category.query.filter_by(title=title).first()
+	
+	# checks to see if a channel has been made
+	channel_page = Channel.query.get(category_page.id)
+
+	# if no channel page, redirect to category
+	if channel_page is None:
+		return redirect(url_for('category_page', page_title=title))
+	else:
+		title = category_page.title 	# fixes any capitalization errors
+
+		# get parent categories
+		links_parent_categories = LinkToCategory.query.filter_by(title_from=category_page.title).all()
+		for link in links_parent_categories:
+			parent_categories.append(link.title_to)
+
+		# get subcategories
+		links_subcategories = LinkToCategory.query.filter_by(title_to=category_page.title).all()
+		for link in links_subcategories:
+			subcategories.append(link.title_from)
+
+		return render_template('channel_page.html', title=title, parent_categories=parent_categories,
+			subcategories=subcategories)
