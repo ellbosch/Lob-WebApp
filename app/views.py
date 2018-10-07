@@ -63,7 +63,7 @@ def register():
 
 
 ''' ************************************
-	CATEGORIES
+	PAGE CREATION
 	************************************'''
 
 # form to submit a new category
@@ -73,11 +73,16 @@ def category_submission():
 	if request.method == 'POST':
 		form = CategorySubmissionForm()
 		if form.validate_on_submit():
-			category = Category(title=form.category_title.data, created_at=datetime.utcnow())
-			categorylink = LinkToCategory(title_from=category.title, namespace_from="category", title_to=form.parent_category.data.title,
+			#  add new category to db
+			category = Category(title=form.category_title.data, category_type=form.category_type.data,
 				created_at=datetime.utcnow())
 			db.session.add(category)
-			db.session.add(categorylink)
+
+			# iterate through each selected parent category and add a link to the db
+			for cat in form.parent_category.data:
+				categorylink = LinkToCategory(title_from=category.title, namespace_from="category",
+					title_to=cat.title, created_at=datetime.utcnow())
+				db.session.add(categorylink)
 			db.session.commit()
 
 			# redirect to newly created category
@@ -108,6 +113,34 @@ def create_channel():
 		# adds params to form, if provided
 		form = ChannelCreationForm(request.args)
 	return render_template('create_channel.html', title='Create Channel', form=form)
+
+# create event
+@application.route('/event_submission', methods=['GET', 'POST'])
+@roles_accepted('admin', 'moderator')
+def event_submission():
+	if request.method == 'POST':
+		form = EventSubmissionForm()
+		if form.validate_on_submit():
+			event = Event(title=form.event_title.data, start_time=form.start_time.data,
+				end_time=form.end_time.data, event_type=form.event_type.data, created_at=datetime.utcnow())
+			categorylink = LinkToCategory(title_from=event.title, namespace_from="event",
+				title_to=form.parent_category.data.title, created_at=datetime.utcnow())
+			db.session.add(event)
+			db.session.add(categorylink)
+			db.session.commit()
+
+			# redirect to newly created category
+			flash('New category created!')
+			return redirect(url_for('category_page', page_title=category.title))
+	else:
+		# adds params to form, if provided
+		form = EventSubmissionForm(request.args)
+	return render_template('category_submission.html', title='Submit New Category', form=form)
+
+
+''' ************************************
+	PAGE VIEWS
+	************************************'''
 
 # view for category page
 @application.route('/category/<page_title>/', methods=['GET'])
@@ -159,14 +192,17 @@ def channel_page(page_title):
 	
 	# look for the category page of the channel, which contains the metadata
 	category_page = Category.query.filter_by(title=title).first()
-	
-	# checks to see if a channel has been made
-	channel_page = Channel.query.get(category_page.id)
 
 	# if no channel page, redirect to category
-	if channel_page is None:
+	if category_page is None:
 		return redirect(url_for('category_page', page_title=title))
 	else:
+		# checks to see if a channel has been made
+		channel_page = Channel.query.get(category_page.id)
+		
+		if channel_page is None:
+			return redirect(url_for('category_page', page_title=title))
+
 		title = category_page.title 	# fixes any capitalization errors
 
 		# get parent categories
@@ -181,3 +217,29 @@ def channel_page(page_title):
 
 		return render_template('channel_page.html', title=title, parent_categories=parent_categories,
 			subcategories=subcategories)
+
+# view for category page
+@application.route('/event/<page_title>/', methods=['GET'])
+def event_page(page_title):
+	# redirect if url has spaces (we convert them to underscores for friendlier urls)
+	if ' ' in page_title:
+		return redirect(url_for('category_page', page_title=page_title.replace(' ', '_')))
+
+	page_exists = False 					# boolean used to track if the category page exsits
+	parent_categories = []					# array used to track parent categories for the queried category
+	subcategories = []
+	title = page_title.replace('_', ' ')	# replace underscores with spaces
+	event_page = Event.query.filter_by(title=title).first()
+
+	if event_page is not None:
+		page_exists = True
+		
+		title = event_page.title 	# fixes any capitalization errors
+
+		# get parent categories
+		links_parent_categories = LinkToCategory.query.filter_by(title_from=event_page.title).all()
+		for link in links_parent_categories:
+			parent_categories.append(link.title_to)
+
+	return render_template('event_page.html', title=title, page_exists=page_exists,
+		parent_categories=parent_categories)

@@ -40,6 +40,15 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return '<User {}>'.format(self.username)    
 
+"""
+SPORTS DATA
+"""
+# class SportsTeamGame(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+#     away_team_cat_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+#     home_team_cat_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+
 
 """
 PAGE TABLES
@@ -49,16 +58,35 @@ class Namespace(enum.Enum):
     channel = 2
     event = 3
 
+class EventType(enum.Enum):
+    default = 1
+    sports_game = 2
+
+class CategoryType(enum.Enum):
+    default = 1
+    sports_league = 2
+    sports_team = 3
+    sports_player = 4
+
 # category pages create the wiki-like hierarchy thoughout the site
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), unique=True, index=True, nullable=False)
+    category_type = db.Column(db.Enum(CategoryType), nullable=False)
     redirect = db.Column(db.Boolean)
     created_at = db.Column(db.DateTime, nullable=False)
 
 # channels have a 1-to-many mapping to categories--they are category pages converted into video consumption experiences
 class Channel(db.Model):
     id_cat = db.Column(db.Integer, db.ForeignKey('category.id'), primary_key=True)
+    created_at = db.Column(db.DateTime, nullable=False)
+
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), index=True, nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False, index=True)
+    end_time = db.Column(db.DateTime)
+    event_type = db.Column(db.Enum(EventType), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
 
 # links either category or event pages to other categories, creating the orgaized structure of the site
@@ -68,18 +96,3 @@ class LinkToCategory(db.Model):
     namespace_from = db.Column(db.Enum(Namespace), nullable=False)
     title_to = db.Column(db.String(255), index=True, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
-
-# pages can be anything from categories, channels, and events
-# class Page(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     namespace = db.Column(db.Enum(Namespace), nullable=False, index=True)
-#     title = db.Column(db.String(255), unique=True, index=True, nullable=False)
-#     redirect = db.Column(db.Boolean)
-#     created_at = db.Column(db.DateTime, nullable=False)
-
-# category links are links FROM pages TO category pages (i.e. FROM Baseball TO Sports)
-# class CategoryLink(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     id_from = db.Column(db.Integer, db.ForeignKey('page.id'), index=True, nullable=False)   # page where link is located
-#     id_to = db.Column(db.Integer, db.ForeignKey('page.id'), index=True, nullable=False)     # page where link sends to
-#     created_at = db.Column(db.DateTime, nullable=False)

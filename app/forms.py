@@ -1,13 +1,19 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms.ext.sqlalchemy.fields import QuerySelectField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, DateTimeField
+from wtforms.ext.sqlalchemy.fields import QuerySelectMultipleField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from app.models import *
 
 
 # get all category choices
-def get_category_choices():
+def get_all_categories():
 	return Category.query.all()
+
+# def get_categories_by_type(category_type):
+# 	return Category.query.filter_by(category_type=category_type).all()
+
+# def get_teams_for_league(league):
+# 	rows = Category.query.filter_by(category_type="sports_team").join(LinkToCategory, LinkToCategory.title_from==Category.title).filter_by(title_to="%s Teams" % (league)).all()
 
 
 class LoginForm(FlaskForm):
@@ -36,10 +42,17 @@ class RegistrationForm(FlaskForm):
 			raise ValidationError('Email address already taken! Please use a different email.')
 
 class CategorySubmissionForm(FlaskForm):
+	# choices for category type
+	category_type_choices = [
+		("default", 'Default'),
+		("sports_team", 'Sports - Team'),
+		("sports_player", 'Sports - Player')
+	]
+
 	category_title = StringField('New Category Title', validators=[DataRequired()])
-	parent_category = QuerySelectField(label='Parent Category',
-		query_factory=get_category_choices, get_label='title',
-		validators=[DataRequired()])
+	category_type = SelectField('Category Type', choices=category_type_choices, coerce=str)
+	parent_category = QuerySelectMultipleField(label='Parent Category',
+		query_factory=get_all_categories, get_label='title', validators=[DataRequired()])
 	submit = SubmitField('Submit')
 
 	def validate_category_title(self, category_title):
@@ -52,8 +65,29 @@ class CategorySubmissionForm(FlaskForm):
 		if page is not None:
 			raise ValidationError('Category title already taken! Please use a different name.')
 
+	# def check_for_duplicates(self, )
+
 class ChannelCreationForm(FlaskForm):
-	category_for_channel = QuerySelectField(label='Make Channel for Category',
-		query_factory=get_category_choices, get_label='title',
+	category_for_channel = QuerySelectMultipleField(label='Make Channel for Category',
+		query_factory=get_all_categories, get_label='title',
 		validators=[DataRequired()])
 	submit = SubmitField('Submit')
+
+class EventSubmissionForm(FlaskForm):
+	# choices for event type
+	event_type_choices = [
+		("default", 'Default'),
+		("sports_game", 'Sports - Game')
+	]
+
+	event_type = SelectField('Event Type', choices=event_type_choices, coerce=str)
+	event_title = StringField('New Event Title', validators=[DataRequired()])
+	start_time = DateTimeField('Start Date', format="%Y-%m-%d %H", validators=[DataRequired()])
+	end_time = DateTimeField('End Date (Optional)', format="%Y-%m-%d %H")
+	parent_category = QuerySelectMultipleField(label='Parent Category',
+		query_factory=get_all_categories, get_label='title', validators=[DataRequired()])
+	
+	# sports-specific fields
+	league = SelectField('League', choices=[], coerce=int)
+	away_team = SelectField('Away Team', choices=[], coerce=int)
+	home_team = SelectField('Home Team', choices=[], coerce=int)
