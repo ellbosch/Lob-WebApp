@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Create Channel</h1>
+<p>Create a channel from a pre-existing category. <a href="{{ url_for('category_submission') }}">Create a new category</a> if it doesn't exist.</p>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.category_for_channel.label }}<br>
+        {{ form.category_for_channel }}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+
+{% endblock %}

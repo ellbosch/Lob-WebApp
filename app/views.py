@@ -1,5 +1,5 @@
 from app import application, db, models, forms, user_datastore#, login_manager
-from app.forms import LoginForm, RegistrationForm, CategorySubmissionForm, ChannelCreationForm
+from app.forms import LoginForm, RegistrationForm, CategorySubmissionForm, ChannelCreationForm, EventSubmissionForm
 from app.models import *
 from flask import render_template, request, jsonify, flash, redirect, url_for, Markup
 from flask_security import current_user, login_user, login_required, logout_user
@@ -123,19 +123,23 @@ def event_submission():
 		if form.validate_on_submit():
 			event = Event(title=form.event_title.data, start_time=form.start_time.data,
 				end_time=form.end_time.data, event_type=form.event_type.data, created_at=datetime.utcnow())
-			categorylink = LinkToCategory(title_from=event.title, namespace_from="event",
-				title_to=form.parent_category.data.title, created_at=datetime.utcnow())
 			db.session.add(event)
-			db.session.add(categorylink)
+			
+			# iterate through each selected parent category and add a link to the db
+			for cat in form.parent_category.data:
+				categorylink = LinkToCategory(title_from=event.title, namespace_from="event",
+					title_to=cat.title, created_at=datetime.utcnow())
+				db.session.add(categorylink)
+			
 			db.session.commit()
 
 			# redirect to newly created category
-			flash('New category created!')
-			return redirect(url_for('category_page', page_title=category.title))
+			flash('New event created!')
+			return redirect(url_for('event_page', page_title=event.title))
 	else:
 		# adds params to form, if provided
 		form = EventSubmissionForm(request.args)
-	return render_template('category_submission.html', title='Submit New Category', form=form)
+	return render_template('event_submission.html', title='Submit New Category', form=form)
 
 
 ''' ************************************
@@ -153,6 +157,7 @@ def category_page(page_title):
 	is_channel = False
 	parent_categories = []					# array used to track parent categories for the queried category
 	subcategories = []
+	events = []
 	title = page_title.replace('_', ' ')	# replace underscores with spaces
 	category_page = Category.query.filter_by(title=title).first()
 
@@ -166,17 +171,17 @@ def category_page(page_title):
 		title = category_page.title 	# fixes any capitalization errors
 
 		# get parent categories
-		links_parent_categories = LinkToCategory.query.filter_by(title_from=category_page.title).all()
-		for link in links_parent_categories:
-			parent_categories.append(link.title_to)
+		parent_categories = [link.title_to for link in get_parent_cats_for_page(title)]
 
 		# get subcategories
-		links_subcategories = LinkToCategory.query.filter_by(title_to=category_page.title).all()
-		for link in links_subcategories:
-			subcategories.append(link.title_from)
+		subcategories = [link.title_from for link in get_subcats_for_page("category", title)]
+
+		# get events
+		events = [event.title for event in get_events_for_page("event", title)]
 
 	return render_template('category_page.html', title=title, page_exists=page_exists,
-		is_channel=is_channel, parent_categories=parent_categories, subcategories=subcategories)
+		is_channel=is_channel, parent_categories=parent_categories, subcategories=subcategories,
+		events=events)
 
 # view for channel page
 @application.route('/channel/<page_title>/', methods=['GET'])
@@ -206,24 +211,23 @@ def channel_page(page_title):
 		title = category_page.title 	# fixes any capitalization errors
 
 		# get parent categories
-		links_parent_categories = LinkToCategory.query.filter_by(title_from=category_page.title).all()
-		for link in links_parent_categories:
-			parent_categories.append(link.title_to)
+		parent_categories = [link.title_to for link in get_parent_cats_for_page(title)]
 
 		# get subcategories
-		links_subcategories = LinkToCategory.query.filter_by(title_to=category_page.title).all()
-		for link in links_subcategories:
-			subcategories.append(link.title_from)
+		subcategories = [link.title_from for link in get_subcats_for_page("category", title)]
+
+		# get events
+		events = [event.title for event in get_events_for_page("event", title)]
 
 		return render_template('channel_page.html', title=title, parent_categories=parent_categories,
-			subcategories=subcategories)
+			subcategories=subcategories, events=events)
 
 # view for category page
 @application.route('/event/<page_title>/', methods=['GET'])
 def event_page(page_title):
 	# redirect if url has spaces (we convert them to underscores for friendlier urls)
 	if ' ' in page_title:
-		return redirect(url_for('category_page', page_title=page_title.replace(' ', '_')))
+		return redirect(url_for('event_page', page_title=page_title.replace(' ', '_')))
 
 	page_exists = False 					# boolean used to track if the category page exsits
 	parent_categories = []					# array used to track parent categories for the queried category
@@ -237,9 +241,18 @@ def event_page(page_title):
 		title = event_page.title 	# fixes any capitalization errors
 
 		# get parent categories
-		links_parent_categories = LinkToCategory.query.filter_by(title_from=event_page.title).all()
-		for link in links_parent_categories:
-			parent_categories.append(link.title_to)
+		parent_categories = [link.title_to for link in get_parent_cats_for_page(title)]
 
 	return render_template('event_page.html', title=title, page_exists=page_exists,
 		parent_categories=parent_categories)
+
+
+def get_parent_cats_for_page(title):
+	return LinkToCategory.query.filter_by(title_from=title).all()
+
+def get_subcats_for_page(namespace_from, title):
+	return LinkToCategory.query.filter_by(namespace_from=namespace_from, title_to=title).all()
+
+def get_events_for_page(namespace_from, title):
+	return Event.query.join(LinkToCategory, Event.title==LinkToCategory.title_from).filter_by(namespace_from=namespace_from,
+		title_to=title).all()

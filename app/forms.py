@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, DateTimeField
-from wtforms.ext.sqlalchemy.fields import QuerySelectMultipleField
+from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+from wtforms.fields.html5 import DateTimeField
 from app.models import *
 
 
@@ -45,6 +46,7 @@ class CategorySubmissionForm(FlaskForm):
 	# choices for category type
 	category_type_choices = [
 		("default", 'Default'),
+		("sports_league", "Sports - League"),
 		("sports_team", 'Sports - Team'),
 		("sports_player", 'Sports - Player')
 	]
@@ -65,10 +67,16 @@ class CategorySubmissionForm(FlaskForm):
 		if page is not None:
 			raise ValidationError('Category title already taken! Please use a different name.')
 
-	# def check_for_duplicates(self, )
+	def check_for_duplicates(self, category_title, parent_category):
+		for cat in parent_category:
+			results = LinkToCategory.query.filter_by(title_from=category_title, namespace_from="category",
+				title_to=cat.title).all()
+			if len(results) > 0:
+				titles = [cat.title for cat in results]
+				raise ValidationError('This category has already been linked to: %s' % titles)
 
 class ChannelCreationForm(FlaskForm):
-	category_for_channel = QuerySelectMultipleField(label='Make Channel for Category',
+	category_for_channel = QuerySelectField(label='Make Channel for Category',
 		query_factory=get_all_categories, get_label='title',
 		validators=[DataRequired()])
 	submit = SubmitField('Submit')
@@ -82,12 +90,12 @@ class EventSubmissionForm(FlaskForm):
 
 	event_type = SelectField('Event Type', choices=event_type_choices, coerce=str)
 	event_title = StringField('New Event Title', validators=[DataRequired()])
-	start_time = DateTimeField('Start Date', format="%Y-%m-%d %H", validators=[DataRequired()])
-	end_time = DateTimeField('End Date (Optional)', format="%Y-%m-%d %H")
+	start_time = DateTimeField('Start Date', validators=[DataRequired()])
+	end_time = DateTimeField('End Date (Optional)')
 	parent_category = QuerySelectMultipleField(label='Parent Category',
 		query_factory=get_all_categories, get_label='title', validators=[DataRequired()])
-	
-	# sports-specific fields
-	league = SelectField('League', choices=[], coerce=int)
-	away_team = SelectField('Away Team', choices=[], coerce=int)
-	home_team = SelectField('Home Team', choices=[], coerce=int)
+	submit = SubmitField('Submit')
+
+	def check_datetime(self, start_time):
+		print(start_time)
+		print(type(start_time))

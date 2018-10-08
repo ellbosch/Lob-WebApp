@@ -1,16 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Category: {{ title }}</h1>
+<h1>{{ title }}</h1>
 
-{% if not page_exists %}
-	<p>No category made for <strong>{{ title }}</strong>! <a href="{{ url_for('category_submission', category_title=title) }}">Create one here.</a>
-{% endif %}
-
-<!-- link to channel page, if it exists -->
-{% if is_channel %}
-	<p><strong><a href="{{ url_for('channel_page', page_title=title) }}">View the channel for {{ title }}.</a></strong></p>
-{% endif %}
 
 <!-- show subcategories -->
 {% if subcategories|length > 0 %}
@@ -56,4 +48,5 @@
 		{% endfor %}
 	</p>
 {% endif %}
+
 {% endblock %}

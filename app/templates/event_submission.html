@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Event Submission</h1>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.event_type.label }}<br>
+        {{ form.event_type }}
+    </p>
+    <p>
+        {{ form.event_title.label }}<br>
+        {{ form.event_title(size=32) }}<br>
+        {% for error in form.event_title.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.start_time.label }}<br>
+        {{ form.start_time(class_='datetimepicker') }}
+    </p>
+    <p>
+        {{ form.end_time.label }}<br>
+        {{ form.end_time(class_='datetimepicker') }}
+    </p>
+    <p>
+        {{ form.parent_category.label }}<br>
+        {{ form.parent_category }}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+
+{% endblock %}

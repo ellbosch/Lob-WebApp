@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+{% if not page_exists %}
+    <p>No event made for <strong>{{ title }}</strong>! <a href="{{ url_for('event_submission', event_title=title) }}">Create one here.</a>
+{% endif %}
+
+<!-- show parent categories -->
+{% if parent_categories|length > 0 %}
+    <p>
+        Categories:
+        {% for cat in parent_categories %}
+            <!-- append a comma if the list is still iterating -->
+            {% if loop.index != parent_categories|length %}
+                <a href="{{ url_for('category_page', page_title=cat) }}">{{ cat }}</a>,
+            {% else %}
+                <a href="{{ url_for('category_page', page_title=cat) }}">{{ cat }}</a>
+            {% endif %}
+        {% endfor %}
+    </p>
+{% endif %}
+{% endblock %}
