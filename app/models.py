@@ -96,3 +96,33 @@ class LinkToCategory(db.Model):
     namespace_from = db.Column(db.Enum(Namespace), nullable=False)
     title_to = db.Column(db.String(255), index=True, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
+
+# class for video
+class Video(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    posted_by = db.Column(db.String(255), db.ForeignKey('user.username'), nullable=False)
+    url_test = db.Column(db.String(255), nullable=False)
+
+# links video to an event page
+class VideoLink(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    video_from = db.Column(db.Integer, db.ForeignKey('video.id'), nullable=False)
+    event_to = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    score = db.Column(db.Integer, nullable=False)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

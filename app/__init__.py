@@ -21,12 +21,13 @@ from app import models			# import model BEFORE creating tables and after db, oth
 
 
 # DELETE THIS: drop tables
-# from app.models import * 
+from app.models import * 
 # LinkToCategory.__table__.drop(db.engine)
+# VideoLink.__table__.drop(db.engine)
 # Channel.__table__.drop(db.engine)
-# Event.__table__.drop(db.engine)
 # Category.__table__.drop(db.engine)
-
+# Video.__table__.drop(db.engine)
+# Event.__table__.drop(db.engine)
 
 
 
@@ -64,6 +65,17 @@ security = Security(application, user_datastore)
 # braves = Category(title="Atlanta Braves", category_type="sports_team", created_at=datetime.utcnow())
 # dodgers = Category(title="Los Angeles Dodgers", category_type="sports_team", created_at=datetime.utcnow())
 # event = Event(title="Event Test", start_time="2018-04-13 10:03:08", event_type="sports_game", created_at=datetime.utcnow())
+# video = Video(posted_by="admin", url_test="https://s3-us-west-2.amazonaws.com/thelob/1.2/nba/reddit-nba-93z6us/reddit-nba-93z6us.mp4")
+
+# db.session.add(sports_cat)
+# db.session.add(baseball_cat)
+# db.session.add(mlb_cat)
+# db.session.add(season_cat)
+# db.session.add(braves)
+# db.session.add(dodgers)
+# db.session.add(event)
+# db.session.add(video)
+# db.session.commit()
 
 # link1 = LinkToCategory(title_from="Baseball", namespace_from="category", title_to="Sports", created_at=datetime.utcnow())
 # link2 = LinkToCategory(title_from="MLB", namespace_from="category", title_to="Baseball", created_at=datetime.utcnow())
@@ -73,13 +85,10 @@ security = Security(application, user_datastore)
 # link6 = LinkToCategory(title_from="Event Test", namespace_from="event", title_to="Los Angeles Dodgers", created_at=datetime.utcnow())
 # link7 = LinkToCategory(title_from="Event Test", namespace_from="event", title_to="Atlanta Braves", created_at=datetime.utcnow())
 
-# db.session.add(sports_cat)
-# db.session.add(baseball_cat)
-# db.session.add(mlb_cat)
-# db.session.add(season_cat)
-# db.session.add(braves)
-# db.session.add(dodgers)
-# db.session.add(event)
+# v = Video.query.first()
+# e = Event.query.first()
+# link8 = VideoLink(video_from=v.id, event_to=e.id, score=0)
+
 # db.session.add(link1)
 # db.session.add(link2)
 # db.session.add(link3)
@@ -87,6 +96,7 @@ security = Security(application, user_datastore)
 # db.session.add(link5)
 # db.session.add(link6)
 # db.session.add(link7)
+# db.session.add(link8)
 # db.session.commit()
 
 from app import views

@@ -243,8 +243,11 @@ def event_page(page_title):
 		# get parent categories
 		parent_categories = [link.title_to for link in get_parent_cats_for_page(title)]
 
+		# get all videos
+		videos = [v.url_test for v in get_videos_for_event(title)]
+
 	return render_template('event_page.html', title=title, page_exists=page_exists,
-		parent_categories=parent_categories)
+		parent_categories=parent_categories, videos=videos)
 
 
 def get_parent_cats_for_page(title):
@@ -256,3 +259,8 @@ def get_subcats_for_page(namespace_from, title):
 def get_events_for_page(namespace_from, title):
 	return Event.query.join(LinkToCategory, Event.title==LinkToCategory.title_from).filter_by(namespace_from=namespace_from,
 		title_to=title).all()
+
+def get_videos_for_event(title):
+	return Video.query.\
+		join(VideoLink, Video.id==VideoLink.video_from).\
+		join(Event, VideoLink.event_to==Event.id).filter_by(title=title).all()
