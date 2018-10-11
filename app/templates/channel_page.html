@@ -19,17 +19,15 @@
 	</p>
 {% endif %}
 
-<!-- show events -->
-{% if events|length > 0 %}
+<!-- show videos with events -->
+{% if videos_per_event.keys()|length > 0 %}
+	<h2>Events</h2>
 	<p>
-		Events:
-		{% for event in events %}
-			<!-- append a comma if the list is still iterating -->
-			{% if loop.index != events|length %}
-				<a href="{{ url_for('event_page', page_title=event) }}">{{ event }}</a>,
-			{% else %}
-				<a href="{{ url_for('event_page', page_title=event) }}">{{ event }}</a>
-			{% endif %}
+		{% for event, videos in videos_per_event.items() %}
+			<p>{{ Event }}</p>
+			{% for url in videos %}
+	            <video width="100%" controls><source src="{{ url }}" type="video/mp4"></video>
+			{% endfor %}
 		{% endfor %}
 	</p>
 {% endif %}

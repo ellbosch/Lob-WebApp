@@ -7,6 +7,7 @@ from flask_security.utils import hash_password, verify_and_update_password
 from flask_security.decorators import roles_required, roles_accepted
 from datetime import datetime
 from sqlalchemy import desc
+from collections import defaultdict
 import json
 
 
@@ -174,10 +175,10 @@ def category_page(page_title):
 		parent_categories = [link.title_to for link in get_parent_cats_for_page(title)]
 
 		# get subcategories
-		subcategories = [link.title_from for link in get_subcats_for_page("category", title)]
+		subcategories = [cat.title for cat in get_subcats_for_cat(title)]
 
 		# get events
-		events = [event.title for event in get_events_for_page("event", title)]
+		events = [event.title for event in get_events_for_cat(title)]
 
 	return render_template('category_page.html', title=title, page_exists=page_exists,
 		is_channel=is_channel, parent_categories=parent_categories, subcategories=subcategories,
@@ -214,13 +215,18 @@ def channel_page(page_title):
 		parent_categories = [link.title_to for link in get_parent_cats_for_page(title)]
 
 		# get subcategories
-		subcategories = [link.title_from for link in get_subcats_for_page("category", title)]
+		subcategories = [cat.title for cat in get_subcats_for_cat(title)]
 
-		# get events
-		events = [event.title for event in get_events_for_page("event", title)]
+		# get all nested events
+		events = [event.title for event in get_nested_events_for_cat(category_page)]
+
+		# get all videos for each event
+		videos_per_event = {}
+		for event in events:
+			videos_per_event[event] = [v.url_test for v in get_videos_for_event(event)]
 
 		return render_template('channel_page.html', title=title, parent_categories=parent_categories,
-			subcategories=subcategories, events=events)
+			subcategories=subcategories, events=events, videos_per_event=videos_per_event)
 
 # view for category page
 @application.route('/event/<page_title>/', methods=['GET'])
@@ -253,12 +259,40 @@ def event_page(page_title):
 def get_parent_cats_for_page(title):
 	return LinkToCategory.query.filter_by(title_from=title).all()
 
-def get_subcats_for_page(namespace_from, title):
-	return LinkToCategory.query.filter_by(namespace_from=namespace_from, title_to=title).all()
+# gets subcategories for a category
+def get_subcats_for_cat(title):
+	return Category.query.join(LinkToCategory, Category.title==LinkToCategory.title_from).\
+		filter_by(namespace_from="category", title_to=title).all()
 
-def get_events_for_page(namespace_from, title):
-	return Event.query.join(LinkToCategory, Event.title==LinkToCategory.title_from).filter_by(namespace_from=namespace_from,
-		title_to=title).all()
+# gets events to report UP to a category
+def get_events_for_cat(title):
+	return Event.query.join(LinkToCategory, Event.title==LinkToCategory.title_from).\
+		filter_by(namespace_from="event", title_to=title).all()
+
+def get_nested_events_for_cat(cat_root):
+	events_set = set()				# the set we return
+	stack_unvisited = []			# stack of unvisited categories in BFS
+	visited = defaultdict(bool)		# hashmap of visited entries
+
+	stack_unvisited.append(cat_root)
+
+	# start breadth-first search for all nested events
+	while len(stack_unvisited) > 0:
+		cat = stack_unvisited.pop()
+		visited[cat] = True
+
+		# add unvisited subcategories to stack_unvisited
+		subcats = get_subcats_for_cat(cat.title)
+		for subcat in subcats:
+			if not visited[subcat]:
+				stack_unvisited.append(subcat)
+
+		# add events to set
+		events = get_events_for_cat(cat.title)
+		for event in events:
+			events_set.add(event)
+
+	return events_set
 
 def get_videos_for_event(title):
 	return Video.query.\
