@@ -5,7 +5,7 @@ from flask import render_template, request, jsonify, flash, redirect, url_for, M
 from flask_security import current_user, login_user, login_required, logout_user
 from flask_security.utils import hash_password, verify_and_update_password
 from flask_security.decorators import roles_required, roles_accepted
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy import desc
 from collections import defaultdict
 import json
@@ -223,7 +223,7 @@ def channel_page(page_title):
 		# get all videos for each event
 		videos_per_event = {}
 		for event in events:
-			videos_per_event[event] = [v.url_test for v in get_videos_for_event(event)]
+			videos_per_event[event] = [v.url for v in get_videos_for_event(event)]
 
 		return render_template('channel_page.html', title=title, parent_categories=parent_categories,
 			subcategories=subcategories, events=events, videos_per_event=videos_per_event)
@@ -250,11 +250,45 @@ def event_page(page_title):
 		parent_categories = [link.title_to for link in get_parent_cats_for_page(title)]
 
 		# get all videos
-		videos = [v.url_test for v in get_videos_for_event(title)]
+		videos = [v.url for v in get_videos_for_event(title)]
 
 	return render_template('event_page.html', title=title, page_exists=page_exists,
 		parent_categories=parent_categories, videos=videos)
 
+''' ************************************
+	VIEW SCRAPED VIDEOS (SSSSHHHHHH)
+	************************************'''
+@application.route('/reddit_videos/<league>', methods=['GET'])
+@login_required
+@roles_accepted('admin')
+def reddit_videos(league):
+	if league == None:
+		return redirect(url_for('reddit_videos', league="nfl"))
+	
+	supported_leagues = ["baseball", "nfl"]
+	posts = None
+	league = league.lower()
+
+	# change mlb to baseball (internally)
+	if league == "mlb":
+		league = "baseball"
+
+	# check to see if there are params for days to look back
+	days_back = 2
+	if request.args.get('days_back') != None:
+		days_back = int(request.args.get('days_back'))
+
+	if league in supported_leagues:
+		# get last 24 hours
+		posts = Videopost.query.filter_by(league=league).\
+			filter(Videopost.date_posted > datetime.utcnow() - timedelta(days=days_back)).\
+			order_by(Videopost.date_posted).all()
+
+	return render_template('reddit_videos.html', posts=posts)
+
+''' ************************************
+	HELPER FUNCTIONS
+	************************************'''
 
 def get_parent_cats_for_page(title):
 	return LinkToCategory.query.filter_by(title_from=title).all()

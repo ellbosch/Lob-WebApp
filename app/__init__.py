@@ -6,6 +6,7 @@ import os
 application = Flask(__name__)
 application.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://admin:Cupcake2777@lobdb.czfflgcbpl6i.us-west-2.rds.amazonaws.com:3306/lobdb?charset=utf8mb4?collate=utf8mb4_unicode_ci'
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+application.config['SQLALCHEMY_BINDS'] = { 'scraped_video' : 'mysql://lebron_james:cupcake2777@thelobdb.czfflgcbpl6i.us-west-2.rds.amazonaws.com:3306/thelobdb?charset=utf8mb4?collate=utf8mb4_unicode_ci' }
 application.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'lob-sicrit-key'
 # application.config['SECURITY_CONFIRMABLE'] = True # UNCOMMENT THIS WHEN EMAIL CONFIRMATION IS ADDED
 application.config['SECURITY_TRACKABLE'] = True
@@ -21,9 +22,9 @@ from app import models			# import model BEFORE creating tables and after db, oth
 
 
 # DELETE THIS: drop tables
-from app.models import * 
-# LinkToCategory.__table__.drop(db.engine)
-# VideoLink.__table__.drop(db.engine)
+# from app.models import * 
+# # LinkToCategory.__table__.drop(db.engine)
+# VideoLinkToEvent.__table__.drop(db.engine)
 # Channel.__table__.drop(db.engine)
 # Category.__table__.drop(db.engine)
 # Video.__table__.drop(db.engine)
@@ -64,9 +65,8 @@ security = Security(application, user_datastore)
 # season_cat = Category(title="MLB Teams", category_type="default", created_at=datetime.utcnow())
 # braves = Category(title="Atlanta Braves", category_type="sports_team", created_at=datetime.utcnow())
 # dodgers = Category(title="Los Angeles Dodgers", category_type="sports_team", created_at=datetime.utcnow())
-# channel = Channel(id_cat=3, created_at=datetime.utcnow())
 # event = Event(title="Event Test", start_time="2018-04-13 10:03:08", event_type="sports_game", created_at=datetime.utcnow())
-# video = Video(posted_by="admin", url_test="https://s3-us-west-2.amazonaws.com/thelob/1.2/nba/reddit-nba-93z6us/reddit-nba-93z6us.mp4")
+# video = Video(posted_by="admin", url="https://s3-us-west-2.amazonaws.com/thelob/1.2/nba/reddit-nba-93z6us/reddit-nba-93z6us.mp4")
 
 # db.session.add(sports_cat)
 # db.session.add(baseball_cat)
@@ -74,7 +74,6 @@ security = Security(application, user_datastore)
 # db.session.add(season_cat)
 # db.session.add(braves)
 # db.session.add(dodgers)
-# db.session.add(channel)
 # db.session.add(event)
 # db.session.add(video)
 # db.session.commit()
@@ -89,8 +88,12 @@ security = Security(application, user_datastore)
 
 # v = Video.query.first()
 # e = Event.query.first()
-# link8 = VideoLink(video_from=v.id, event_to=e.id, score=0)
+# mlb_cat = Category.query.filter_by(title="MLB").first()
 
+# channel = Channel(id_cat=mlb_cat.id, created_at=datetime.utcnow())
+# link8 = VideoLinkToEvent(video_from=v.id, event_to=e.id, score=0)
+
+# db.session.add(channel)
 # db.session.add(link1)
 # db.session.add(link2)
 # db.session.add(link3)

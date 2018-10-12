@@ -101,16 +101,67 @@ class LinkToCategory(db.Model):
 class Video(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     posted_by = db.Column(db.String(255), db.ForeignKey('user.username'), nullable=False)
-    url_test = db.Column(db.String(255), nullable=False)
+    url = db.Column(db.String(255), nullable=False)
 
 # links video to an event page
-class VideoLink(db.Model):
+class VideoLinkToEvent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     video_from = db.Column(db.Integer, db.ForeignKey('video.id'), nullable=False)
     event_to = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
     score = db.Column(db.Integer, nullable=False)
 
 
+# sssshhhhhhhhh
+class Videopost(db.Model):
+    __bind_key__ = 'scraped_video'
+    id = db.Column(db.String(80), primary_key=True)
+    title = db.Column(db.String(300), nullable=False)
+    source = db.Column(db.String(80), nullable=False)
+    league = db.Column(db.String(80), nullable=False, index=True)
+    date_posted = db.Column(db.DateTime, nullable=False)
+    author = db.Column(db.String(80))
+    reddit_score = db.Column(db.Integer)
+    reddit_comments_url = db.Column(db.String(80))
+    url = db.Column(db.String(200), nullable=False)
+    mp4_url = db.Column(db.String(200), nullable=False)
+    height = db.Column(db.Integer, nullable=False)
+    width = db.Column(db.Integer, nullable=False)
+    in_train_set = db.Column(db.Boolean, nullable=False)
+
+    def __init__(self, id=None, title=None, source=None, league=None, date_posted=None, author=None,
+                reddit_score=None, reddit_comments_url=None, url=None, in_train_set=0):
+        self.id = id
+        self.title = title
+        self.source = source
+        self.league = league
+        self.date_posted = date_posted
+        self.author = author
+        self.reddit_score = reddit_score
+        self.reddit_comments_url = reddit_comments_url
+        self.url = url
+        self.in_train_set = in_train_set
+
+    def set_dimension(self, height=height, width=width):
+        self.height = height
+        self.width = width
+
+    def set_mp4_url(self, mp4_url):
+        self.mp4_url = mp4_url
+
+    # serialize for json consumption
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'url': self.url,
+            'mp4_url': self.mp4_url,
+            'league': self.league,
+            'date_posted': self.date_posted,
+            'author': self.author,
+            'reddit_comments_url': self.reddit_comments_url,
+            'reddit_score': self.reddit_score
+        }
 
 
 
