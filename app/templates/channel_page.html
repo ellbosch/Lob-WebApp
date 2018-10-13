@@ -23,10 +23,11 @@
 {% if videos_per_event.keys()|length > 0 %}
 	<h2>Events</h2>
 	<p>
-		{% for event, videos in videos_per_event.items() %}
+		{% for event, links in videos_per_event.items() %}
 			<p>{{ Event }}</p>
-			{% for url in videos %}
-	            <video width="100%" controls><source src="{{ url }}" type="video/mp4"></video>
+			{% for link in links %}
+	            <video width="100%" controls><source src="{{ link.url }}" type="video/mp4"></video>
+	            <p><strong>{{ link.text }}</strong></p>
 			{% endfor %}
 		{% endfor %}
 	</p>

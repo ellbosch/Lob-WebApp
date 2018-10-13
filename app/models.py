@@ -75,11 +75,13 @@ class Category(db.Model):
     category_type = db.Column(db.Enum(CategoryType), nullable=False)
     redirect = db.Column(db.Boolean)
     created_at = db.Column(db.DateTime, nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 # channels have a 1-to-many mapping to categories--they are category pages converted into video consumption experiences
 class Channel(db.Model):
     id_cat = db.Column(db.Integer, db.ForeignKey('category.id'), primary_key=True)
     created_at = db.Column(db.DateTime, nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -88,6 +90,7 @@ class Event(db.Model):
     end_time = db.Column(db.DateTime)
     event_type = db.Column(db.Enum(EventType), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 # links either category or event pages to other categories, creating the orgaized structure of the site
 class LinkToCategory(db.Model):
@@ -96,19 +99,47 @@ class LinkToCategory(db.Model):
     namespace_from = db.Column(db.Enum(Namespace), nullable=False)
     title_to = db.Column(db.String(255), index=True, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+
+"""
+VIDEO TABLES
+"""
 
 # class for video
 class Video(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    posted_by = db.Column(db.String(255), db.ForeignKey('user.username'), nullable=False)
+    posted_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     url = db.Column(db.String(255), nullable=False)
+    height = db.Column(db.Integer, nullable=False)
+    width = db.Column(db.Integer, nullable=False)
+    duration = db.Column(db.Integer, nullable=False)
+    latest_title_id = db.Column(db.Integer, db.ForeignKey('video_text_revision.text_id'),\
+        nullable=False)
 
 # links video to an event page
 class VideoLinkToEvent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     video_from = db.Column(db.Integer, db.ForeignKey('video.id'), nullable=False)
-    event_to = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    event_to = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False, index=True)
     score = db.Column(db.Integer, nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+
+# keep separate table for all text so we can keep track of revisions
+class Text(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(255), nullable=False)
+
+# keeps track of revisions to video title/description
+class VideoTextRevision(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text_id = db.Column(db.Integer, db.ForeignKey('text.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    rev_comment = db.Column(db.String(255))
+    is_minor_edit = db.Column(db.Boolean, nullable=False)
+    rev_parent_id = db.Column(db.Integer, db.ForeignKey('video_text_revision.id'))
 
 
 # sssshhhhhhhhh

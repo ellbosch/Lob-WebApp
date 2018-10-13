@@ -41,6 +41,7 @@ def login():
         next_page = request.args.get('next')	# checks for redirect
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home_page')
+
         return redirect(next_page)
 
     return render_template('login.html', form=form)
@@ -62,6 +63,64 @@ def register():
         return redirect(url_for('home_page'))
     return render_template('register.html', title='Register', form=form)
 
+@application.route('/load_sample_data', methods=['GET', 'POST'])
+def load_sample_data():
+	# load sample data (if not already loaded)
+	if len(Category.query.all()) == 0:
+		# get current user
+		user_id = current_user.id
+
+		sports_cat = Category(created_by=user_id, title="Sports", category_type="default", created_at=datetime.utcnow())
+		baseball_cat = Category(created_by=user_id, title="Baseball", category_type="default", created_at=datetime.utcnow())
+		mlb_cat = Category(created_by=user_id, title="MLB", category_type="sports_league", created_at=datetime.utcnow())
+		season_cat = Category(created_by=user_id, title="MLB Teams", category_type="default", created_at=datetime.utcnow())
+		braves = Category(created_by=user_id, title="Atlanta Braves", category_type="sports_team", created_at=datetime.utcnow())
+		dodgers = Category(created_by=user_id, title="Los Angeles Dodgers", category_type="sports_team", created_at=datetime.utcnow())
+		event = Event(created_by=user_id, title="Event Test", start_time="2018-04-13 10:03:08", event_type="sports_game", created_at=datetime.utcnow())
+		text = Text(text="hey this is a text")
+
+		db.session.add(sports_cat)
+		db.session.add(baseball_cat)
+		db.session.add(mlb_cat)
+		db.session.add(season_cat)
+		db.session.add(braves)
+		db.session.add(dodgers)
+		db.session.add(event)
+		db.session.add(text)
+		db.session.flush()		# update primary keys
+
+		link1 = LinkToCategory(created_by=user_id, title_from="Baseball", namespace_from="category", title_to="Sports", created_at=datetime.utcnow())
+		link2 = LinkToCategory(created_by=user_id, title_from="MLB", namespace_from="category", title_to="Baseball", created_at=datetime.utcnow())
+		link3 = LinkToCategory(created_by=user_id, title_from="MLB Teams", namespace_from="category", title_to="MLB", created_at=datetime.utcnow())
+		link4 = LinkToCategory(created_by=user_id, title_from="Atlanta Braves", namespace_from="category", title_to="MLB Teams", created_at=datetime.utcnow())
+		link5 = LinkToCategory(created_by=user_id, title_from="Los Angeles Dodgers", namespace_from="category", title_to="MLB Teams", created_at=datetime.utcnow())
+		link6 = LinkToCategory(created_by=user_id, title_from="Event Test", namespace_from="event", title_to="Los Angeles Dodgers", created_at=datetime.utcnow())
+		link7 = LinkToCategory(created_by=user_id, title_from="Event Test", namespace_from="event", title_to="Atlanta Braves", created_at=datetime.utcnow())
+		text_rev = VideoTextRevision(text_id=text.id, timestamp=datetime.utcnow(),\
+			created_by=user_id, is_minor_edit=False)
+		channel = Channel(created_by=user_id, id_cat=mlb_cat.id, created_at=datetime.utcnow())
+	
+		db.session.add(channel)
+		db.session.add(text_rev)
+		db.session.add(link1)
+		db.session.add(link2)
+		db.session.add(link3)
+		db.session.add(link4)
+		db.session.add(link5)
+		db.session.add(link6)
+		db.session.add(link7)
+		db.session.flush()
+	
+
+		video = Video(latest_title_id=text_rev.id, height=-1, width=-1, duration=-1, posted_by=user_id, url="https://s3-us-west-2.amazonaws.com/thelob/1.2/nba/reddit-nba-93z6us/reddit-nba-93z6us.mp4")
+		db.session.add(video)
+		db.session.flush()
+
+		link8 = VideoLinkToEvent(created_by=user_id, video_from=video.id, event_to=event.id, score=0)
+		db.session.add(link8)
+		db.session.commit()
+
+	return render_template('index.html')
 
 ''' ************************************
 	PAGE CREATION
@@ -141,6 +200,25 @@ def event_submission():
 		# adds params to form, if provided
 		form = EventSubmissionForm(request.args)
 	return render_template('event_submission.html', title='Submit New Category', form=form)
+
+# create video
+@application.route('/video_submission', methods=['GET', 'POST'])
+@roles_accepted('admin', 'moderator')
+def video_submission():
+	if request.method == 'POST':
+		form = VideoSubmissionForm()
+		if form.validate_on_submit():
+			# create video and text rows
+			video = Video(posted_by=current_user.id, url=form.video_url.data, height=-1,\
+				width=-1, duration=-1)
+			text = Text(text=form.video_title.data)
+			db.session.add(video)
+			db.session.add(text)
+			db.commit()
+
+			# create text revision and event link after above is made
+
+			text_rev = VideoTextRevision()
 
 
 ''' ************************************
@@ -223,7 +301,7 @@ def channel_page(page_title):
 		# get all videos for each event
 		videos_per_event = {}
 		for event in events:
-			videos_per_event[event] = [v.url for v in get_videos_for_event(event)]
+			videos_per_event[event] = get_videos_for_event(event)
 
 		return render_template('channel_page.html', title=title, parent_categories=parent_categories,
 			subcategories=subcategories, events=events, videos_per_event=videos_per_event)
@@ -329,6 +407,9 @@ def get_nested_events_for_cat(cat_root):
 	return events_set
 
 def get_videos_for_event(title):
-	return Video.query.\
-		join(VideoLink, Video.id==VideoLink.video_from).\
-		join(Event, VideoLink.event_to==Event.id).filter_by(title=title).all()
+	return VideoLinkToEvent.query.\
+		join(Video, VideoLinkToEvent.video_from==Video.id).\
+		join(VideoTextRevision, Video.latest_title_id==VideoTextRevision.text_id).\
+		join(Text, VideoTextRevision.text_id==Text.id).\
+		join(Event, VideoLinkToEvent.event_to==Event.id).filter_by(title=title).\
+		add_columns(Video.url, Video.posted_by, Text.text).all()

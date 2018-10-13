@@ -99,3 +99,12 @@ class EventSubmissionForm(FlaskForm):
 	def check_datetime(self, start_time):
 		print(start_time)
 		print(type(start_time))
+
+class VideoSubmissionForm(FlaskForm):
+	video_url = StringField('Video Link (Must be .mp4)', validators=[DataRequired()])
+	video_title = StringField('Video Title', validators=[DataRequired()])
+
+	# ensure video is .mp4
+	def check_video_format(self, video_url):
+		if not video_url.endswith('.mp4'):
+			raise ValidationError('Video must be in .mp4 format!')

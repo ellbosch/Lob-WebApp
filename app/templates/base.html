@@ -9,6 +9,14 @@
 </head>
 <body>
 	<div class='container'>
+		{% if messages %}
+			<ul class=flashes>
+				{% for message in messages %}
+					<li>{{ message }}</li>
+				{% endfor %}
+			</ul>
+		{% endif %}
+
 		{% if current_user.is_authenticated %}
 			<p><span>Hi, {{ current_user.username }}!</span>&nbsp;<a href="{{ url_for('logout') }}">Log out</a></p>
 		{% else %}
