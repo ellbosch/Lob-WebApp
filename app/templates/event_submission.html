@@ -15,10 +15,15 @@
             <span style="color: red;">{{ error }}</span>
         {% endfor %}
     </p>
-    <p>
-        {{ form.start_time.label }}<br>
-        {{ form.start_time(class_='datetimepicker') }}
-    </p>
+    <div class="form-group">
+        {{ form.start_time.label }}
+        <div class="input-group date" id="datetimepicker_event_start" data-target-input="nearest">
+            {{ form.start_time(type='text', class_='datetimepicker-input', data_target='datetimepicker_event_start') }}
+            <div class="input-group-append" data-target="#datetimepicker_event_start" data-toggle="datetimepicker">
+                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+            </div>
+        </div>
+    </div>
     <p>
         {{ form.end_time.label }}<br>
         {{ form.end_time(class_='datetimepicker') }}

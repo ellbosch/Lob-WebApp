@@ -1,0 +1,3 @@
+[submodule "app/app/static/bootstrap-4"]
+	path = app/app/static/bootstrap-4
+	url = https://github.com/tempusdominus/bootstrap-4

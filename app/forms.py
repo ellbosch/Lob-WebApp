@@ -10,12 +10,20 @@ from app.models import *
 def get_all_categories():
 	return Category.query.all()
 
-# def get_categories_by_type(category_type):
-# 	return Category.query.filter_by(category_type=category_type).all()
+def get_all_events():
+	return Event.query.all()
 
-# def get_teams_for_league(league):
-# 	rows = Category.query.filter_by(category_type="sports_team").join(LinkToCategory, LinkToCategory.title_from==Category.title).filter_by(title_to="%s Teams" % (league)).all()
+# ensure video is .mp4
+def validate_video_url(form, video_url):
+	# check if format is correct
+	if not video_url.data.endswith('.mp4'):
+		raise ValidationError('Video must be in .mp4 format.')
 
+	# check if same video has already been uploaded
+	v = Video.query.filter_by(url=video_url.data).first()
+	if v != None:
+		print("just making sure")
+		raise ValidationError("This video has already been uploaded.")
 
 class LoginForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
@@ -53,7 +61,7 @@ class CategorySubmissionForm(FlaskForm):
 
 	category_title = StringField('New Category Title', validators=[DataRequired()])
 	category_type = SelectField('Category Type', choices=category_type_choices, coerce=str)
-	parent_category = QuerySelectMultipleField(label='Parent Category',
+	parent_category = QuerySelectMultipleField(label='Parent Categories',
 		query_factory=get_all_categories, get_label='title', validators=[DataRequired()])
 	submit = SubmitField('Submit')
 
@@ -90,21 +98,22 @@ class EventSubmissionForm(FlaskForm):
 
 	event_type = SelectField('Event Type', choices=event_type_choices, coerce=str)
 	event_title = StringField('New Event Title', validators=[DataRequired()])
+
+	# 2018-04-13 10:03:08
 	start_time = DateTimeField('Start Date', validators=[DataRequired()])
 	end_time = DateTimeField('End Date (Optional)')
-	parent_category = QuerySelectMultipleField(label='Parent Category',
+	parent_category = QuerySelectMultipleField(label='Parent Categories',
 		query_factory=get_all_categories, get_label='title', validators=[DataRequired()])
 	submit = SubmitField('Submit')
 
-	def check_datetime(self, start_time):
-		print(start_time)
-		print(type(start_time))
+	# def check_datetime(self, start_time):
+	# 	print(start_time)
+	# 	print(type(start_time))
 
 class VideoSubmissionForm(FlaskForm):
-	video_url = StringField('Video Link (Must be .mp4)', validators=[DataRequired()])
+	video_url = StringField('Video Link (must be .mp4)', validators=[DataRequired(), validate_video_url])
 	video_title = StringField('Video Title', validators=[DataRequired()])
+	parent_events = QuerySelectMultipleField(label='Upload to Event Pages',
+		query_factory=get_all_events, get_label='title', validators=[DataRequired()])
+	submit = SubmitField('Submit')
 
-	# ensure video is .mp4
-	def check_video_format(self, video_url):
-		if not video_url.endswith('.mp4'):
-			raise ValidationError('Video must be in .mp4 format!')
