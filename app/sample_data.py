@@ -51,7 +51,7 @@ def setup_sport(league, user_id):
 
 	# add teams
 	for team in teams:
-		cat = Category(created_by=user_id, title=team, category_type="default", created_at=datetime.utcnow())
+		cat = Category(created_by=user_id, title=team, category_type="sports_team", created_at=datetime.utcnow())
 		link = LinkToCategory(created_by=user_id, title_from=team, namespace_from="category", title_to="%s Teams" % league, created_at=datetime.utcnow())
 		db.session.add(cat)
 		db.session.add(link)

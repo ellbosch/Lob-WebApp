@@ -1,17 +1,30 @@
+from app.models import *
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, DateTimeField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, DateTimeField, RadioField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from wtforms.fields.html5 import DateTimeField
-from app.models import *
+from pytz import reference
 
 
-# get all category choices
+"""
+QUERIES FOR QUERY SELECTORS
+"""
 def get_all_categories():
 	return Category.query.all()
 
 def get_all_events():
 	return Event.query.all()
+
+def get_all_leagues():
+	return Category.query.filter_by(category_type="sports_league").order_by(Category.title).all()
+
+def get_all_teams():
+	return Category.query.filter_by(category_type="sports_team").order_by(Category.title).all()
+
+"""
+HELPER FUNCTIONS
+"""
 
 # ensure video is .mp4
 def validate_video_url(form, video_url):
@@ -24,6 +37,11 @@ def validate_video_url(form, video_url):
 	if v != None:
 		print("just making sure")
 		raise ValidationError("This video has already been uploaded.")
+
+
+"""
+FORM CLASSES
+"""
 
 class LoginForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
@@ -96,14 +114,26 @@ class EventSubmissionForm(FlaskForm):
 		("sports_game", 'Sports - Game')
 	]
 
-	event_type = SelectField('Event Type', choices=event_type_choices, coerce=str)
-	event_title = StringField('New Event Title', validators=[DataRequired()])
+	# string for local timezone
+	local_tz = reference.LocalTimezone().tzname(datetime.now())
 
-	# 2018-04-13 10:03:08
-	start_time = DateTimeField('Start Date', validators=[DataRequired()])
-	end_time = DateTimeField('End Date (Optional)')
+	event_type = RadioField('Event Type', choices=event_type_choices, coerce=str, default="sports_game")
+
+	# for default event
+	event_title = StringField('New Event Title')
+
+	# for sports game matchup: automatically generate title name
+	league = QuerySelectField('Select League', query_factory=get_all_leagues,
+		get_label='title')
+	away_team = QuerySelectField('Select Away Team', query_factory=get_all_teams,
+		get_label='title')
+	home_team = QuerySelectField('Select Home Team', query_factory=get_all_teams,
+		get_label='title')
+
+	start_time = StringField('Start Date - %s' % local_tz, validators=[DataRequired()])
+	end_time = StringField('End Date - %s (Optional)' % local_tz)
 	parent_category = QuerySelectMultipleField(label='Parent Categories',
-		query_factory=get_all_categories, get_label='title', validators=[DataRequired()])
+		query_factory=get_all_categories, get_label='title')
 	submit = SubmitField('Submit')
 
 	# def check_datetime(self, start_time):

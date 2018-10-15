@@ -1,13 +1,14 @@
-from app import application, db, models, forms, user_datastore, sample_data
+from app import application, db, models, forms, user_datastore, sample_data, security
 from app.forms import LoginForm, RegistrationForm, CategorySubmissionForm, ChannelCreationForm, EventSubmissionForm, VideoSubmissionForm
 from app.models import *
 from flask import render_template, request, jsonify, flash, redirect, url_for, Markup
-from flask_security import current_user, login_user, login_required, logout_user
+from flask_security import current_user, login_user, login_required, logout_user, url_for_security
 from flask_security.utils import hash_password, verify_and_update_password
 from flask_security.decorators import roles_required, roles_accepted
 from datetime import datetime, timedelta
 from sqlalchemy import desc
 from collections import defaultdict
+from pytz import reference
 import json
 
 
@@ -44,7 +45,7 @@ def login():
 
         return redirect(next_page)
 
-    return render_template('login.html', form=form)
+    return render_template('login_user.html', form=form)
 
 @application.route('/register', methods=['GET', 'POST'])
 @roles_accepted('admin', 'moderator')						# DELETE THIS!
@@ -61,7 +62,7 @@ def register():
         db.session.commit()
         flash('You have successfully registered your account!')
         return redirect(url_for('home_page'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('register_user.html', title='Register', form=form)
 
 @application.route('/load_sample_data', methods=['GET', 'POST'])
 def load_sample_data():
@@ -129,16 +130,45 @@ def event_submission():
 	if request.method == 'POST':
 		form = EventSubmissionForm()
 		if form.validate_on_submit():
-			event = Event(title=form.event_title.data, start_time=form.start_time.data,
-				end_time=form.end_time.data, event_type=form.event_type.data, created_at=datetime.utcnow())
-			db.session.add(event)
+			event_type = form.event_type.data
+			event_title = form.event_title.data
+			start_time = datetime.strptime(form.start_time.data, "%m/%d/%Y %I:%M %p")
+
+			# create default type event
+			if event_type == "default":
+				end_time = datetime.strptime(form.end_time.data, "%m/%d/%Y %I:%M %p")
+
+				event = Event(title=event_title, start_time=start_time, end_time=end_time,
+					event_type=event_type, created_at=datetime.utcnow(), created_by=current_user.id)
+				db.session.add(event)
+				
+				# iterate through each selected parent category and add a link to the db
+				for cat in form.parent_category.data:
+					categorylink = LinkToCategory(title_from=event.title, namespace_from="event",
+						title_to=cat.title, created_at=datetime.utcnow(), created_by=current_user.id)
+					db.session.add(categorylink)
 			
-			# iterate through each selected parent category and add a link to the db
-			for cat in form.parent_category.data:
-				categorylink = LinkToCategory(title_from=event.title, namespace_from="event",
-					title_to=cat.title, created_at=datetime.utcnow())
-				db.session.add(categorylink)
-			
+			# create sports game type event
+			else:
+				league = form.league.data.title
+				away_team = form.away_team.data.title
+				home_team = form.home_team.data.title
+				event_title = "%s at %s: %s" % (away_team, home_team,
+					start_time.strftime("%b %-d, %Y"))
+
+				# create event
+				event = Event(title=event_title, start_time=start_time,	event_type=event_type,
+					created_at=datetime.utcnow(), created_by=current_user.id)
+				db.session.add(event)
+				
+				# make parent categories for both teams
+				link_away_team = LinkToCategory(title_from=event.title, namespace_from="event",
+					title_to=away_team, created_at=datetime.utcnow(), created_by=current_user.id)
+				link_home_team = LinkToCategory(title_from=event.title, namespace_from="event",
+					title_to=home_team, created_at=datetime.utcnow(), created_by=current_user.id)
+				db.session.add(link_away_team)
+				db.session.add(link_home_team)
+
 			db.session.commit()
 
 			# redirect to newly created category
@@ -147,7 +177,11 @@ def event_submission():
 	else:
 		# adds params to form, if provided
 		form = EventSubmissionForm(request.args)
-	return render_template('event_submission.html', title='Submit New Category', form=form)
+	
+	# get local timezone
+	tz_local = reference.LocalTimezone().tzname(datetime.now())
+	return render_template('event_submission.html', title='Submit New Category', form=form,
+		tz_local=tz_local)
 
 # submit video
 @application.route('/video_submission', methods=['GET', 'POST'])
@@ -301,6 +335,7 @@ def event_page(page_title):
 
 	return render_template('event_page.html', title=title, page_exists=page_exists,
 		parent_categories=parent_categories, videos=videos)
+
 
 ''' ************************************
 	VIEW SCRAPED VIDEOS (SSSSHHHHHH)

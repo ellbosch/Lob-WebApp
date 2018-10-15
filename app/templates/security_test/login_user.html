@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Sign In</h1>
+<form action="{{ url_for_security('login') }}" method="post">
+    {{ login_user_form.hidden_tag() }}
+    <div class="form-group">
+        {{ login_user_form.username.label }}
+        {{ login_user_form.username(class_="form-control") }}
+        <div class="invalid-feedback">
+            {% for error in login_user_form.username.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="form-group">
+        {{ login_user_form.password.label }}
+        {{ login_user_form.password(class_="form-control") }}
+        {{ login_user_form.remember() }} {{ login_user_form.remember.label }}
+        <div class="invalid-feedback">
+            {% for error in login_user_form.password.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    <!-- submit button -->
+    <!-- <input id="submit" name="submit" type="submit" value="Log In" class="btn btn-primary btn-lg btn-block"> -->
+    {{ login_user_form.submit }}
+</form>
+
+{% endblock %}

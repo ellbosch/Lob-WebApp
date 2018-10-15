@@ -4,35 +4,101 @@
 <h1>Event Submission</h1>
 <form action="" method="post">
     {{ form.hidden_tag() }}
-    <p>
-        {{ form.event_type.label }}<br>
-        {{ form.event_type }}
-    </p>
-    <p>
-        {{ form.event_title.label }}<br>
-        {{ form.event_title(size=32) }}<br>
-        {% for error in form.event_title.errors %}
-            <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
     <div class="form-group">
-        {{ form.start_time.label }}
-        <div class="input-group date" id="datetimepicker_event_start" data-target-input="nearest">
-            {{ form.start_time(type='text', class_='datetimepicker-input', data_target='datetimepicker_event_start') }}
-            <div class="input-group-append" data-target="#datetimepicker_event_start" data-toggle="datetimepicker">
-                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+        {{ form.event_type.label }}
+        {{ form.event_type }}
+        <small class="form-text text-muted">
+        Select "Sport - Game" if the event is a sports match between two teams. Otherwise, select "Default".
+        </small>
+    </div>
+
+    <!-- league selector - sports games only -->
+    <div class="form-group event_sports">
+        {{ form.league.label }}
+        {{ form.league(class_="form-control") }}
+    </div>
+
+    <!-- title - default event only -->
+    <div class="form-group event_default">
+        {{ form.event_title.label }}
+        {{ form.event_title(class_="form-control", placeholder="Title will be used for unique URL") }}
+        <div class="invalid-feedback">
+            {% for error in form.event_title.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- away and home teams - sports event only -->
+    <div class="form-row event_sports">
+        <!-- away team -->
+        <div class="col-md-6 form-group">
+            {{ form.away_team.label }}
+            {{ form.away_team(class_="form-control") }}
+            <div class="invalid-feedback">
+                {% for error in form.away_team.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- home team -->
+        <div class="col-md-6 form-group">
+            {{ form.home_team.label }}
+            {{ form.home_team(class_="form-control") }}
+            <div class="invalid-feedback">
+                {% for error in form.home_team.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
             </div>
         </div>
     </div>
-    <p>
-        {{ form.end_time.label }}<br>
-        {{ form.end_time(class_='datetimepicker') }}
-    </p>
-    <p>
-        {{ form.parent_category.label }}<br>
-        {{ form.parent_category }}
-    </p>
-    <p>{{ form.submit() }}</p>
+
+    <!-- start and end date -->
+    <div class="form-row">
+        <!-- start time -->
+        <div class="col-md-6 form-group">
+            {{ form.start_time.label }}
+            <div class="input-group mb-3 date datetimepicker" id="datetimepicker_event_start" data-target-input="nearest">
+                {{ form.start_time(type='text', placeholder="Enter date and time (%s timezone)" % tz_local, class_='form-control datetimepicker-input', data_target='datetimepicker_event_start') }}
+
+                <div class="input-group-append" data-target="#datetimepicker_event_start" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
+                </div>
+            </div>
+            <div class="invalid-feedback">
+                {% for error in form.start_time.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- end time - default events only -->
+        <div class="col-md-6 form-group event_default">
+            {{ form.end_time.label }}
+            <div class="input-group mb-3 date datetimepicker" id="datetimepicker_event_end" data-target-input="nearest">
+                {{ form.end_time(type='text', placeholder="Enter date and time (%s timezone)" % tz_local, class_='form-control datetimepicker-input', data_target='datetimepicker_event_end') }}
+
+                <div class="input-group-append" data-target="#datetimepicker_event_end" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
+                </div>
+            </div>
+            <div class="invalid-feedback">
+                {% for error in form.end_time.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- parent category multi selector -->
+    <div class="form-group event_default">
+        {{ form.parent_category.label }}
+        {{ form.parent_category(class_="form-control", size=8) }}
+    </div>
+
+    <!-- submit button -->
+    <input id="submit" name="submit" type="submit" value="Submit" class="btn btn-primary btn-lg btn-block">
 </form>
 
 {% endblock %}
