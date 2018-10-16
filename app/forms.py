@@ -5,6 +5,7 @@ from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleF
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from wtforms.fields.html5 import DateTimeField
 from pytz import reference
+from flask_security.forms import LoginForm
 
 
 """
@@ -43,11 +44,17 @@ def validate_video_url(form, video_url):
 FORM CLASSES
 """
 
-class LoginForm(FlaskForm):
-	username = StringField('Username', validators=[DataRequired()])
-	password = PasswordField('Password', validators=[DataRequired()])
-	remember_me = BooleanField('Remember Me')
-	submit = SubmitField('Sign In')
+class ExtendedLoginForm(LoginForm):
+	def validate_email(self, email):
+		user = User.query.filter_by(email=email.data).first()
+		print(user)
+		if user == None:
+			raise ValidationError('Invalid password.')
+
+	# username = StringField('Username', validators=[DataRequired()])
+	# password = PasswordField('Password', validators=[DataRequired()])
+	# remember_me = BooleanField('Remember Me')
+	# submit = SubmitField('Sign In')
 
 class RegistrationForm(FlaskForm):
 	firstname = StringField('First Name', validators=[DataRequired()])
@@ -55,7 +62,8 @@ class RegistrationForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
 	email = StringField('Email', validators=[DataRequired(), Email()])
 	password = PasswordField('Password', validators=[DataRequired()])
-	password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
+	password2 = PasswordField('Repeat Password', validators=[DataRequired(),
+		EqualTo('password')])
 	submit = SubmitField('Register')
 
 	def validate_username(self, username):

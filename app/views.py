@@ -1,8 +1,8 @@
 from app import application, db, models, forms, user_datastore, sample_data, security
-from app.forms import LoginForm, RegistrationForm, CategorySubmissionForm, ChannelCreationForm, EventSubmissionForm, VideoSubmissionForm
+from app.forms import RegistrationForm, CategorySubmissionForm, ChannelCreationForm, EventSubmissionForm, VideoSubmissionForm
 from app.models import *
 from flask import render_template, request, jsonify, flash, redirect, url_for, Markup
-from flask_security import current_user, login_user, login_required, logout_user, url_for_security
+from flask_security import current_user, login_required, logout_user
 from flask_security.utils import hash_password, verify_and_update_password
 from flask_security.decorators import roles_required, roles_accepted
 from datetime import datetime, timedelta
@@ -31,27 +31,28 @@ def logout():
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
+	pass
     # validate login
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if verify_and_update_password(form.password.data):
-            flash('Invalid username or password')
-            return redirect(url_for('login'))
-        login_user(user, remember=form.remember_me.data)
-        next_page = request.args.get('next')	# checks for redirect
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('home_page')
+    # form = LoginForm()
+    # if form.validate_on_submit():
+    #     user = User.query.filter_by(username=form.username.data).first()
+    #     if verify_and_update_password(form.password.data):
+    #         flash('Invalid username or password')
+    #         return redirect(url_for('login'))
+    #     login_user(user, remember=form.remember_me.data)
+    #     next_page = request.args.get('next')	# checks for redirect
+    #     if not next_page or url_parse(next_page).netloc != '':
+    #         next_page = url_for('home_page')
 
-        return redirect(next_page)
+    #     return redirect(next_page)
 
-    return render_template('login_user.html', form=form)
+    # return render_template('login_user.html', form=form)
 
 @application.route('/register', methods=['GET', 'POST'])
-@roles_accepted('admin', 'moderator')						# DELETE THIS!
+# @roles_accepted('admin', 'moderator')						# DELETE THIS!
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('home_page'))
     form = RegistrationForm()
     if form.validate_on_submit():
         user_datastore.create_user(username=form.username.data, email=form.email.data,
@@ -62,7 +63,7 @@ def register():
         db.session.commit()
         flash('You have successfully registered your account!')
         return redirect(url_for('home_page'))
-    return render_template('register_user.html', title='Register', form=form)
+    return render_template('security/register_user.html', title='Register', form=form)
 
 @application.route('/load_sample_data', methods=['GET', 'POST'])
 def load_sample_data():

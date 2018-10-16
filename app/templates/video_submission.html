@@ -4,25 +4,25 @@
 <h1>{{ title }}</h1>
 <form action="" method="post">
     {{ form.hidden_tag() }}
-    <p>
-        {{ form.video_url.label }}<br>
-        {{ form.video_url(size=32) }}<br>
+    <div class="form-group">
+        {{ form.video_url.label }}
+        {{ form.video_url(class_="form-control") }}
         {% for error in form.video_url.errors %}
             <span style="color: red;">{{ error }}</span>
         {% endfor %}
-    </p>
-    <p>
-        {{ form.video_title.label }}<br>
-        {{ form.video_title(size=32) }}<br>
+    </div>
+    <div class="form-group">
+        {{ form.video_title.label }}
+        {{ form.video_title(class_="form-control") }}
         {% for error in form.video_title.errors %}
             <span style="color: red;">{{ error }}</span>
         {% endfor %}
-    </p>
-    <p>
-        {{ form.parent_events.label }}<br>
-        {{ form.parent_events }}
-    </p>
-    <p>{{ form.submit() }}</p>
+    </div>
+    <div class="form-group">
+        {{ form.parent_events.label }}
+        {{ form.parent_events(class_="form-control", size=8) }}
+    </div>
+    <input id="submit" name="submit" type="submit" value="Submit" class="btn btn-primary btn-lg btn-block">
 </form>
 
 {% endblock %}

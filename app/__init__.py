@@ -39,7 +39,8 @@ db.session.commit() 			# This is needed to write the changes to database
 
 # Setup Flask-Security
 user_datastore = SQLAlchemyUserDatastore(db, models.User, models.Role)
-security = Security(application, user_datastore)
+from app.forms import ExtendedLoginForm
+security = Security(application, user_datastore, login_form=ExtendedLoginForm)
 
 
 
