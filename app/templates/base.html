@@ -15,7 +15,7 @@
 </head>
 <body>
 	<!-- NAVBAR -->
-	<nav class="navbar navbar-expand-sm navbar-light bg-light sticky-top">
+	<nav class="navbar navbar-expand-sm navbar-light sticky-top" id="navbar_main">
 		<a class="navbar-brand" href="{{ url_for('home_page') }}"><strong>Lob</strong></a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>
@@ -24,6 +24,19 @@
 		<div class="collapse navbar-collapse" id="navbarSupportedContent">
 			<ul class="navbar-nav mr-auto">
 				{% if current_user.is_authenticated %}
+					<!-- GO TO CHANNEL OPTIONS -->
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownChannels" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						Channels
+						</a>
+						<div class="dropdown-menu" aria-labelledby="navbarDropdownChannels">
+							{% for channel in CHANNELS %}
+								<a class="dropdown-item" href="{{ url_for('channel_page', page_title=channel.title) }}">{{ channel.title }}</a>
+							{% endfor %}
+						</div>
+
+					</li>
+					<!-- CREATE PAGE ACTIONS -->
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAdd" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						Add
@@ -42,7 +55,6 @@
 					{% endif %}
 				{% endif %}
 			</ul>
-
 			<!-- USER ACCCOUNT OPTIONS -->
 			<ul class="nav justify-content-end">
 			{% if current_user.is_authenticated %}
@@ -70,17 +82,34 @@
 
 	<!-- REST OF BODY -->
 	<div class='container'>
-	{% with messages = get_flashed_messages() %}
-		{% if messages %}
-			{% for message in messages %}
-				<div class="alert alert-secondary" role="alert">
-				{{ message }}
-				</div>
-			{% endfor %}
-		{% endif %}
-	{% endwith %}
+		<!-- <div class="row">
+			<div class="col-sm-2">
+				<nav class="sticky-top" id="sidebar_container">
+					<span class="navbar-text sidebar_heading">Channels</span>
+					<ul class="nav flex-column">
+						<li class="nav-item">
+							<a class="nav-link active" href="#">Active</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="#">Link</a>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		</div> -->
+		<div>	
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					{% for message in messages %}
+						<div class="alert alert-secondary" role="alert">
+						{{ message }}
+						</div>
+					{% endfor %}
+				{% endif %}
+			{% endwith %}
 
-	{% block content %}{% endblock %}
+			{% block content %}{% endblock %}
+		</div>
 	</div>
 
 	<!-- jquery -->

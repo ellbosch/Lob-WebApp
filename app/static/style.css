@@ -1,5 +1,36 @@
+body {
+	background-color: #fdfdfd;
+}
+
+#navbar_main {
+	margin-bottom: 5px;
+	border-bottom: 1px solid rgba(200,200,200,.15);
+	background-color: rgba(245,245,245,.95);
+}
+
 #event_type {
 	list-style: none;
 	padding-left: 0;
 	margin-bottom: 0;
+}
+
+#sidebar_container {
+	padding-top: 4rem;
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+	z-index: 0;
+}
+
+.sidebar_heading {
+	font-size: .75rem;
+	text-transform: uppercase;
+	padding: .5rem 1rem;
+}
+
+.card_video {
+	max-width: 600px;
+	margin-bottom: 10px;
 }

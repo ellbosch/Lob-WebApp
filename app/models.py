@@ -167,6 +167,10 @@ class VideoTextRevision(db.Model):
 
 
 # sssshhhhhhhhh
+# class RedditVideoIgnore(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     videopost_id = db.Column(db.Integer, db.ForeignKey('videopost.id'))
+
 class Videopost(db.Model):
     __bind_key__ = 'scraped_video'
     id = db.Column(db.String(80), primary_key=True)

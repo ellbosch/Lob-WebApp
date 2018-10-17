@@ -1,5 +1,5 @@
 from app import application, db, models, forms, user_datastore, sample_data, security
-from app.forms import RegistrationForm, CategorySubmissionForm, ChannelCreationForm, EventSubmissionForm, VideoSubmissionForm
+from app.forms import RegistrationForm, CategorySubmissionForm, ChannelCreationForm, EventSubmissionForm, VideoSubmissionForm, UserRoleForm
 from app.models import *
 from flask import render_template, request, jsonify, flash, redirect, url_for, Markup
 from flask_security import current_user, login_required, logout_user
@@ -8,9 +8,12 @@ from flask_security.decorators import roles_required, roles_accepted
 from datetime import datetime, timedelta
 from sqlalchemy import desc
 from collections import defaultdict
-from pytz import reference
+import pytz
 import json
 
+
+channels = Channel.query.join(Category, Channel.id_cat==Category.id).add_columns(Category.title).all()
+application.jinja_env.globals['CHANNELS'] = channels
 
 @application.route('/')
 def home_page():
@@ -29,24 +32,10 @@ def logout():
     logout_user()
     return redirect(url_for('home_page'))
 
+# nothing in login but the route still needs to be made!
 @application.route('/login', methods=['GET', 'POST'])
 def login():
 	pass
-    # validate login
-    # form = LoginForm()
-    # if form.validate_on_submit():
-    #     user = User.query.filter_by(username=form.username.data).first()
-    #     if verify_and_update_password(form.password.data):
-    #         flash('Invalid username or password')
-    #         return redirect(url_for('login'))
-    #     login_user(user, remember=form.remember_me.data)
-    #     next_page = request.args.get('next')	# checks for redirect
-    #     if not next_page or url_parse(next_page).netloc != '':
-    #         next_page = url_for('home_page')
-
-    #     return redirect(next_page)
-
-    # return render_template('login_user.html', form=form)
 
 @application.route('/register', methods=['GET', 'POST'])
 # @roles_accepted('admin', 'moderator')						# DELETE THIS!
@@ -72,6 +61,50 @@ def load_sample_data():
 		sample_data.load(current_user.id)
 
 	return render_template('index.html')
+
+
+''' ************************************
+	SETTINGS / ADMIN
+	************************************'''
+# admin page to view signed up users
+@application.route('/settings/user_access')
+@roles_accepted('admin')
+def user_access():
+	return render_template('user_access.html', users=User.query.all())
+
+# admin page to change user roles
+@application.route('/settings/user_access/<username>')
+@roles_accepted('admin')
+def edit_user_roles(username):
+	#  query for user
+	user = User.query.filter_by(username=username).first()
+	
+	if request.method == 'POST':
+		form = UserRoleForm()
+		if form.validate_on_submit():
+			roles = []
+
+			# iterate through each selected parent category and add a link to the db
+			for role in form.roles.data:
+				roles.append(Role.get(role.id))
+
+			user.roles = roles
+			db.session.commit()
+
+			flash('User roles edited.')
+			# return redirect(url_for('category_page', page_title=category.title))
+	else:
+		# adds params to form, if provided
+		form = UserRoleForm()
+	return render_template('edit_user_roles.html', form=form, user=user)
+
+# user page
+@application.route('/user/<username>')
+@roles_accepted('admin', 'beta_user')
+def user_page(username):
+	return render_template('user_page.html', user=User.query.filter_by(username=username).first(),
+		current_user=current_user)
+
 
 ''' ************************************
 	PAGE CREATION
@@ -111,7 +144,8 @@ def create_channel():
 	if request.method == 'POST':
 		form = ChannelCreationForm()
 		if form.validate_on_submit():
-			channel = Channel(id_cat=form.category_for_channel.data.id, created_at=datetime.utcnow())
+			channel = Channel(id_cat=form.category_for_channel.data.id, created_at=datetime.utcnow(),
+				created_by=current_user.id)
 			db.session.add(channel)
 			db.session.commit()
 
@@ -134,11 +168,11 @@ def event_submission():
 		if form.validate_on_submit():
 			event_type = form.event_type.data
 			event_title = form.event_title.data
-			start_time = datetime.strptime(form.start_time.data, "%m/%d/%Y %I:%M %p")
+			start_time = datetime.strptime("%s %s" % (form.start_time.data, form.tz.data), "%m/%d/%Y %I:%M %p %z")
 
 			# create default type event
 			if event_type == "default":
-				end_time = datetime.strptime(form.end_time.data, "%m/%d/%Y %I:%M %p")
+				end_time = datetime.strptime("%s %s" % (form.end_time.data, form.tz.data), "%m/%d/%Y %I:%M %p %z")
 
 				event = Event(title=event_title, start_time=start_time, end_time=end_time,
 					event_type=event_type, created_at=datetime.utcnow(), created_by=current_user.id)
@@ -180,10 +214,7 @@ def event_submission():
 		# adds params to form, if provided
 		form = EventSubmissionForm(request.args)
 	
-	# get local timezone
-	tz_local = reference.LocalTimezone().tzname(datetime.now())
-	return render_template('event_submission.html', title='Submit New Category', form=form,
-		tz_local=tz_local)
+	return render_template('event_submission.html', title='Submit New Category', form=form)
 
 # submit video
 @application.route('/video_submission', methods=['GET', 'POST'])
@@ -357,7 +388,7 @@ def reddit_videos(league):
 		return redirect(url_for('reddit_videos', league="nfl"))
 	
 	supported_leagues = ["baseball", "nfl"]
-	posts = None
+	posts_filted = None
 	league = league.lower()
 
 	# change mlb to baseball (internally)
@@ -370,12 +401,23 @@ def reddit_videos(league):
 		days_back = int(request.args.get('days_back'))
 
 	if league in supported_leagues:
-		# get last 24 hours
-		posts = Videopost.query.filter_by(league=league).\
+		posts_filtered = []
+
+		# get last n days of reddit
+		posts_reddit = Videopost.query.filter_by(league=league).\
 			filter(Videopost.date_posted > datetime.utcnow() - timedelta(days=days_back)).\
 			order_by(Videopost.date_posted).all()
 
-	return render_template('reddit_videos.html', posts=posts, league=league)
+		# get all posts from lob (so we know which to remove from feed)
+		urls = [v.url for v in Video.query.all()]
+		print(urls)
+
+		# super inefficient call to remove already uploaded videos
+		for p in posts_reddit:
+			if p.mp4_url not in urls:
+				posts_filtered.append(p)
+
+	return render_template('reddit_videos.html', posts=posts_filtered, league=league)
 
 ''' ************************************
 	HELPER FUNCTIONS
@@ -426,7 +468,7 @@ def get_videos_for_event(title):
 		join(VideoTextRevision, Video.latest_title_id==VideoTextRevision.text_id).\
 		join(Text, VideoTextRevision.text_id==Text.id).\
 		join(Event, VideoLinkToEvent.event_to==Event.id).filter_by(title=title).\
-		add_columns(Video.url, Video.posted_by, Video.uploaded_at, Text.text).all()
+		add_columns(Video.url, Video.posted_by, Video.uploaded_at, Text.text, Event.title).all()
 
 # gets videos for all nested videos in category
 def get_nested_videos_for_cat(cat):

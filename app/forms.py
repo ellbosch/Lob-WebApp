@@ -4,7 +4,6 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField, Selec
 from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from wtforms.fields.html5 import DateTimeField
-from pytz import reference
 from flask_security.forms import LoginForm
 
 
@@ -22,6 +21,9 @@ def get_all_leagues():
 
 def get_all_teams():
 	return Category.query.filter_by(category_type="sports_team").order_by(Category.title).all()
+
+def get_roles():
+	return Role.query.all()
 
 """
 HELPER FUNCTIONS
@@ -122,9 +124,6 @@ class EventSubmissionForm(FlaskForm):
 		("sports_game", 'Sports - Game')
 	]
 
-	# string for local timezone
-	local_tz = reference.LocalTimezone().tzname(datetime.now())
-
 	event_type = RadioField('Event Type', choices=event_type_choices, coerce=str, default="sports_game")
 
 	# for default event
@@ -138,10 +137,12 @@ class EventSubmissionForm(FlaskForm):
 	home_team = QuerySelectField('Select Home Team', query_factory=get_all_teams,
 		get_label='title')
 
-	start_time = StringField('Start Date - %s' % local_tz, validators=[DataRequired()])
-	end_time = StringField('End Date - %s (Optional)' % local_tz)
+	start_time = StringField('Start Date', validators=[DataRequired()])
+	end_time = StringField('End Date (Optional)')
 	parent_category = QuerySelectMultipleField(label='Parent Categories',
 		query_factory=get_all_categories, get_label='title')
+	tz = StringField('Time Zone')		# hidden input that stores time zone
+
 	submit = SubmitField('Submit')
 
 	# def check_datetime(self, start_time):
@@ -154,4 +155,8 @@ class VideoSubmissionForm(FlaskForm):
 	parent_events = QuerySelectMultipleField(label='Upload to Event Pages',
 		query_factory=get_all_events, get_label='title', validators=[DataRequired()])
 	submit = SubmitField('Submit')
+
+class UserRoleForm(FlaskForm):
+	roles = QuerySelectMultipleField(label='Select Roles', query_factory=get_roles,
+		get_label='name', default=["3"])
 

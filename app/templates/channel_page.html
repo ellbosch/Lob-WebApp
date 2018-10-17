@@ -24,7 +24,7 @@
 	<h2>Events</h2>
 	<p>
 		{% for event in events %}
-			<a href="{{ url_for('event_page', page_title=event) }}">{{ event }}</a>
+			<p><a href="{{ url_for('event_page', page_title=event) }}">{{ event }}</a></p>
 		{% endfor %}
 	</p>
 {% endif %}
@@ -32,10 +32,17 @@
 <!-- show videos -->
 {% if videos|length > 0 %}
 	<h2>Videos</h2>
+	<div class="row">
 	{% for link in videos %}
-        <video width="100%" controls><source src="{{ link.url }}" type="video/mp4"></video>
-        <p><strong>{{ link.text }}</strong></p>
+		<div class="card card_video border-light">
+			<video class="card-img-top" controls><source src="{{ link.url }}" type="video/mp4"></video>
+			<div class="card-body">
+				<h5 class="card-title">{{ link.text }}</h5>
+				<small class="text-muted"><a href="{{ url_for('event_page', page_title=link.title) }}">{{ link.title }}</a></small>
+			</div>
+		</div>
 	{% endfor %}
+	</div>
 {% endif %}
 
 <!-- show parent categories -->

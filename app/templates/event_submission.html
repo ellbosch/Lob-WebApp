@@ -58,9 +58,9 @@
     <div class="form-row">
         <!-- start time -->
         <div class="col-md-6 form-group">
-            {{ form.start_time.label }}
+            {{ form.start_time.label }} - <strong><span id="datetimepicker_tz_start"></span></strong>
             <div class="input-group mb-3 date datetimepicker" id="datetimepicker_event_start" data-target-input="nearest">
-                {{ form.start_time(type='text', placeholder="Enter date and time (%s timezone)" % tz_local, class_='form-control datetimepicker-input', data_target='datetimepicker_event_start') }}
+                {{ form.start_time(type='text', class_='form-control datetimepicker-input', data_target='datetimepicker_event_start') }}
 
                 <div class="input-group-append" data-target="#datetimepicker_event_start" data-toggle="datetimepicker">
                     <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
@@ -75,9 +75,9 @@
 
         <!-- end time - default events only -->
         <div class="col-md-6 form-group event_default">
-            {{ form.end_time.label }}
+            {{ form.end_time.label }} - <strong><span id="datetimepicker_tz_end"></span></strong>
             <div class="input-group mb-3 date datetimepicker" id="datetimepicker_event_end" data-target-input="nearest">
-                {{ form.end_time(type='text', placeholder="Enter date and time (%s timezone)" % tz_local, class_='form-control datetimepicker-input', data_target='datetimepicker_event_end') }}
+                {{ form.end_time(type='text', class_='form-control datetimepicker-input', data_target='datetimepicker_event_end') }}
 
                 <div class="input-group-append" data-target="#datetimepicker_event_end" data-toggle="datetimepicker">
                     <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
@@ -97,8 +97,20 @@
         {{ form.parent_category(class_="form-control", size=8) }}
     </div>
 
+    <!-- stores timezone (hidden) -->
+    {{ form.tz(id="input_tz", type="hidden") }}
+
     <!-- submit button -->
     <input id="submit" name="submit" type="submit" value="Submit" class="btn btn-primary btn-lg btn-block">
 </form>
+
+<!-- script to get local timezone -->
+<script type="text/javascript">
+    var time_zone = new Date().toString().match(/\(([A-Za-z\s].*)\)/)[1];
+
+    document.getElementById("datetimepicker_tz_start").innerHTML = time_zone;
+    document.getElementById("datetimepicker_tz_end").innerHTML = time_zone;
+    document.getElementById("input_tz").value = new Date().toString().match(/([-\+][0-9]+)\s/)[1];
+</script>
 
 {% endblock %}
