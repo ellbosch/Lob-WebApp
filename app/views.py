@@ -66,6 +66,7 @@ def register():
     return render_template('security/register_user.html', title='Register', form=form)
 
 @application.route('/load_sample_data', methods=['GET', 'POST'])
+@roles_accepted('admin')
 def load_sample_data():
 	if current_user.id != None:
 		sample_data.load(current_user.id)
@@ -78,7 +79,7 @@ def load_sample_data():
 
 # form to submit a new category
 @application.route('/category_submission', methods=['GET', 'POST'])
-@roles_accepted('admin', 'moderator')
+@roles_accepted('admin', 'moderator', 'beta_user')
 def category_submission():
 	if request.method == 'POST':
 		form = CategorySubmissionForm()
@@ -203,7 +204,7 @@ def video_submission():
 
 			# create video and text rows
 			video = Video(posted_by=current_user.id, url=form.video_url.data, height=-1,\
-				width=-1, duration=-1, latest_title_id=text_rev.id)
+				width=-1, duration=-1, latest_title_id=text_rev.id, uploaded_at=datetime.utcnow())
 			db.session.add(video)
 			db.session.flush()
 
@@ -231,6 +232,7 @@ def video_submission():
 
 # view for category page
 @application.route('/category/<page_title>/', methods=['GET'])
+@roles_accepted('admin', 'moderator', 'beta_user')
 def category_page(page_title):
 	# redirect if url has spaces (we convert them to underscores for friendlier urls)
 	if ' ' in page_title:
@@ -269,6 +271,7 @@ def category_page(page_title):
 # view for channel page
 @application.route('/channel/<page_title>/', methods=['GET'])
 @application.route('/<page_title>/', methods=['GET'])
+@roles_accepted('admin', 'moderator', 'beta_user')
 def channel_page(page_title):
 	# redirect if url has spaces (we convert them to underscores for friendlier urls)
 	if ' ' in page_title:
@@ -302,16 +305,20 @@ def channel_page(page_title):
 		# get all nested events
 		events = [event.title for event in get_nested_events_for_cat(category_page)]
 
-		# get all videos for each event
-		videos_per_event = {}
-		for event in events:
-			videos_per_event[event] = get_videos_for_event(event)
+		# get all videos, sorted by upload time
+		videos = get_nested_videos_for_cat(category_page)
+
+		# get all videos for each event, organized by event
+		# videos_per_event = {}
+		# for event in events:
+		# 	videos_per_event[event] = get_videos_for_event(event)
 
 		return render_template('channel_page.html', title=title, parent_categories=parent_categories,
-			subcategories=subcategories, events=events, videos_per_event=videos_per_event)
+			subcategories=subcategories, events=events, videos=videos)
 
 # view for category page
 @application.route('/event/<page_title>/', methods=['GET'])
+@roles_accepted('admin', 'moderator', 'beta_user')
 def event_page(page_title):
 	# redirect if url has spaces (we convert them to underscores for friendlier urls)
 	if ' ' in page_title:
@@ -320,6 +327,7 @@ def event_page(page_title):
 	page_exists = False 					# boolean used to track if the category page exsits
 	parent_categories = []					# array used to track parent categories for the queried category
 	subcategories = []
+	videos = []
 	title = page_title.replace('_', ' ')	# replace underscores with spaces
 	event_page = Event.query.filter_by(title=title).first()
 
@@ -332,7 +340,7 @@ def event_page(page_title):
 		parent_categories = [link.title_to for link in get_parent_cats_for_page(title)]
 
 		# get all videos
-		videos = [v.url for v in get_videos_for_event(title)]
+		videos = [v for v in get_videos_for_event(title)]
 
 	return render_template('event_page.html', title=title, page_exists=page_exists,
 		parent_categories=parent_categories, videos=videos)
@@ -384,7 +392,8 @@ def get_subcats_for_cat(title):
 # gets events to report UP to a category
 def get_events_for_cat(title):
 	return Event.query.join(LinkToCategory, Event.title==LinkToCategory.title_from).\
-		filter_by(namespace_from="event", title_to=title).all()
+		filter_by(namespace_from="event", title_to=title).\
+		order_by(desc(Event.start_time)).all()
 
 def get_nested_events_for_cat(cat_root):
 	events_set = set()				# the set we return
@@ -417,4 +426,16 @@ def get_videos_for_event(title):
 		join(VideoTextRevision, Video.latest_title_id==VideoTextRevision.text_id).\
 		join(Text, VideoTextRevision.text_id==Text.id).\
 		join(Event, VideoLinkToEvent.event_to==Event.id).filter_by(title=title).\
-		add_columns(Video.url, Video.posted_by, Text.text).all()
+		add_columns(Video.url, Video.posted_by, Video.uploaded_at, Text.text).all()
+
+# gets videos for all nested videos in category
+def get_nested_videos_for_cat(cat):
+	videos = []
+	events = get_nested_events_for_cat(cat)
+
+	for event in events:
+		videos.extend(get_videos_for_event(event.title))
+
+	videos_sorted = sorted(videos, key=lambda v: v.uploaded_at, reverse=True)
+	return videos_sorted
+

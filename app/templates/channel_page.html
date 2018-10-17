@@ -20,17 +20,22 @@
 {% endif %}
 
 <!-- show videos with events -->
-{% if videos_per_event.keys()|length > 0 %}
+{% if events|length > 0 %}
 	<h2>Events</h2>
 	<p>
-		{% for event, links in videos_per_event.items() %}
-			<p>{{ Event }}</p>
-			{% for link in links %}
-	            <video width="100%" controls><source src="{{ link.url }}" type="video/mp4"></video>
-	            <p><strong>{{ link.text }}</strong></p>
-			{% endfor %}
+		{% for event in events %}
+			<a href="{{ url_for('event_page', page_title=event) }}">{{ event }}</a>
 		{% endfor %}
 	</p>
+{% endif %}
+
+<!-- show videos -->
+{% if videos|length > 0 %}
+	<h2>Videos</h2>
+	{% for link in videos %}
+        <video width="100%" controls><source src="{{ link.url }}" type="video/mp4"></video>
+        <p><strong>{{ link.text }}</strong></p>
+	{% endfor %}
 {% endif %}
 
 <!-- show parent categories -->

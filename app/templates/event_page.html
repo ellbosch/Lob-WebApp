@@ -24,12 +24,11 @@
 
 <!-- show videos -->
 {% if videos|length > 0 %}
-    <p>Videos</p>
-    <p>
-        {% for url in videos %}
-            <video width="100%" controls><source src="{{ url }}" type="video/mp4"></video>
-        {% endfor %}
-    </p>
+    <h2>Videos</h2>
+    {% for link in videos %}
+        <video width="100%" controls><source src="{{ link.url }}" type="video/mp4"></video>
+        <p><strong>{{ link.text }}</strong></p>
+    {% endfor %}
 {% endif %}
 
 {% endblock %}

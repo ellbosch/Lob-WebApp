@@ -12,7 +12,8 @@ def convert_utc_to_local(timestamp):
     to_zone = tz.tzlocal()
 
     utc = timestamp.replace(tzinfo=from_zone)
-    return utc.astimezone(to_zone)
+    local = utc.astimezone(to_zone)
+    return local
 
 
 """
@@ -138,6 +139,7 @@ class Video(db.Model):
     duration = db.Column(db.Integer, nullable=False)
     latest_title_id = db.Column(db.Integer, db.ForeignKey('video_text_revision.text_id'),\
         nullable=False)
+    uploaded_at = db.Column(db.DateTime, nullable=False)
 
 # links video to an event page
 class VideoLinkToEvent(db.Model):

@@ -48,6 +48,7 @@ security = Security(application, user_datastore, login_form=ExtendedLoginForm)
 # create moderator and admin roles
 # user_datastore.create_role(name='admin')
 # user_datastore.create_role(name='moderator')
+# user_datastore.create_role(name='beta_user')
 
 # from flask_security.utils import hash_password
 # from datetime import datetime
