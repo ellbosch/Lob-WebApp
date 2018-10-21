@@ -11,6 +11,7 @@
             <span style="color: red;">{{ error }}</span>
         {% endfor %}
     </div>
+    <video class="card_video" controls><source src="{{ form.video_url.data }}" type="video/mp4"></video>
     <div class="form-group">
         {{ form.video_title.label }}
         {{ form.video_title(class_="form-control") }}
@@ -19,7 +20,10 @@
         {% endfor %}
     </div>
     <div class="form-group">
-        {{ form.parent_events.label }}
+        {{ form.parent_events.label }} - 
+        <!-- make new event if doesn't exist -->
+        <a href="{{ url_for('event_submission', next_url=request.url) }}">Create New Event</a>
+
         {{ form.parent_events(class_="form-control", size=8) }}
     </div>
     <input id="submit" name="submit" type="submit" value="Submit" class="btn btn-primary btn-lg btn-block">

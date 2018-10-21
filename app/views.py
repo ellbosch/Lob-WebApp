@@ -219,7 +219,14 @@ def event_submission():
 
 			# redirect to newly created category
 			flash('New event created!')
-			return redirect(url_for('event_page', page_title=event.title))
+
+			# redirect back to video upload if redirect specified
+			next_url = request.args.get('next_url')
+
+			if next_url != None:
+				return redirect(next_url)
+			else:
+				return redirect(url_for('event_page', page_title=event.title))
 	else:
 		# adds params to form, if provided
 		form = EventSubmissionForm(request.args)
@@ -259,8 +266,22 @@ def video_submission():
 			db.session.commit()
 
 			flash('New video posted!')
-			render_template('video_submission.html', title='Submit New Video', form=form)
+
+			# redirect to next video to upload if queue not empty
+			queue = request.args.getlist('queue')
+			if len(queue) > 0:				
+				# pop first video from queue for form
+				video_data = queue.pop().split('|')
+				video_url = video_data[0]
+				video_title = video_data[1]
+
+				return redirect(url_for('video_submission', video_url=video_url,
+					video_title=video_title, queue=queue))
+			else:
+				return redirect(url_for('reddit_videos', league='mlb'))
+
 			# return redirect(url_for('video_page', video_id=video.id))
+			render_template('video_submission.html', title='Submit New Video', form=form)
 	else:
 		# adds params to form, if provided
 		form = VideoSubmissionForm(request.args)
@@ -390,44 +411,61 @@ def event_page(page_title):
 ''' ************************************
 	VIEW SCRAPED VIDEOS (SSSSHHHHHH)
 	************************************'''
-@application.route('/reddit_videos/<league>', methods=['GET'])
+@application.route('/reddit_videos/<league>', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin')
 def reddit_videos(league):
-	if league == None:
-		return redirect(url_for('reddit_videos', league="nfl"))
-	
-	supported_leagues = ["baseball", "nfl"]
-	posts_filted = None
-	league = league.lower()
+	if request.method == 'POST':
+		# get list of all videos to post to event
+		videos_to_upload = request.form.getlist('video_upload')
+		
+		# make get request back to reddit_videos if no video selected
+		if len(videos_to_upload) == 0:
+			flash('No video selected!')
+			return redirect(url_for('reddit_videos', league=league))
 
-	# change mlb to baseball (internally)
-	if league == "mlb":
-		league = "baseball"
+		# pop first video from queue for form
+		video_data = videos_to_upload.pop().split('|')
+		video_url = video_data[0]
+		video_title = video_data[1]
 
-	# check to see if there are params for days to look back
-	days_back = 2
-	if request.args.get('days_back') != None:
-		days_back = int(request.args.get('days_back'))
+		return redirect(url_for('video_submission', video_url=video_url,
+			video_title=video_title, queue=videos_to_upload))
+	else:
 
-	if league in supported_leagues:
-		posts_filtered = []
+		if league == None:
+			return redirect(url_for('reddit_videos', league="nfl"))
+		
+		supported_leagues = ["baseball", "nfl"]
+		posts_filted = None
+		league = league.lower()
 
-		# get last n days of reddit
-		posts_reddit = Videopost.query.filter_by(league=league).\
-			filter(Videopost.date_posted > datetime.utcnow() - timedelta(days=days_back)).\
-			order_by(Videopost.date_posted).all()
+		# change mlb to baseball (internally)
+		if league == "mlb":
+			league = "baseball"
 
-		# get all posts from lob (so we know which to remove from feed)
-		urls = [v.url for v in Video.query.all()]
-		print(urls)
+		# check to see if there are params for days to look back
+		days_back = 2
+		if request.args.get('days_back') != None:
+			days_back = int(request.args.get('days_back'))
 
-		# super inefficient call to remove already uploaded videos
-		for p in posts_reddit:
-			if p.mp4_url not in urls:
-				posts_filtered.append(p)
+		if league in supported_leagues:
+			posts_filtered = []
 
-	return render_template('reddit_videos.html', posts=posts_filtered, league=league)
+			# get last n days of reddit
+			posts_reddit = Videopost.query.filter_by(league=league).\
+				filter(Videopost.date_posted > datetime.utcnow() - timedelta(days=days_back)).\
+				order_by(Videopost.date_posted).all()
+
+			# get all posts from lob (so we know which to remove from feed)
+			urls = [v.url for v in Video.query.all()]
+
+			# super inefficient call to remove already uploaded videos
+			for p in posts_reddit:
+				if p.mp4_url not in urls:
+					posts_filtered.append(p)
+
+		return render_template('reddit_videos.html', posts=posts_filtered, league=league)
 
 ''' ************************************
 	HELPER FUNCTIONS

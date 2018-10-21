@@ -2,37 +2,51 @@
 
 {% block content %}
 {% if posts == None %}
-<p><strong>Sport doesn't exist, or you're a dingus and misspelled something.</strong></p>
+	<p><strong>Sport doesn't exist, or you're a dingus and misspelled something.</strong></p>
 {% else %}
 	<!-- show videos -->
-	{% if posts|length > 0 %}
-		<div class="row">
-			<div class="col-sm-auto">
-				<h1>Reddit Videos</h1>
-			</div>
-			<div class="col">
-				<ul class="nav nav-pills">
-					<li class="nav-item">
-						<a class = "nav-link{% if league=='baseball' %} active{% endif %}" href="{{ url_for('reddit_videos', league='mlb') }}">MLB</a>
-					</li>
-					<li class="nav-item">
-						<a class = "nav-link{% if league=='nfl' %} active{% endif %}" href="{{ url_for('reddit_videos', league='nfl') }}">NFL</a>
-					</li>
-				</ul>
-			</div>
+	<div class="row">
+		<div class="col-sm-auto">
+			<h1>Reddit Videos</h1>
 		</div>
-		<br>
-	    <div>
-	        {% for post in posts %}
-	        	<div class="card card_video border-light">
+		<div class="col">
+			<ul class="nav nav-pills">
+				<li class="nav-item">
+					<a class = "nav-link{% if league=='baseball' %} active{% endif %}" href="{{ url_for('reddit_videos', league='mlb') }}">MLB</a>
+				</li>
+				<li class="nav-item">
+					<a class = "nav-link{% if league=='nfl' %} active{% endif %}" href="{{ url_for('reddit_videos', league='nfl') }}">NFL</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<br>
+
+	{% if posts|length > 0 %}
+		<form action="" method="post">
+			<!-- upload button sticky top -->
+			<nav class="sticky-top" id="get_reddit_videos_navbar">
+				<input id="submit" name="submit" type="submit" value="Upload" class="btn btn-primary btn-block">
+			</nav>
+
+			{% for post in posts %}
+				<div class="card card_video border-light">
 					<video class="card-img-top" controls><source src="{{ post.mp4_url }}" type="video/mp4"></video>
 					<div class="card-body">
 						<h5 class="card-title">{{ post.title }}</h5>
-						<small class="text-muted">{{ post.date_posted_local.strftime("%b %-d, %Y %-I:%M %p") }}&nbsp;&nbsp;&nbsp;<a class="btn btn-primary" href="{{ url_for('video_submission', video_url=post.mp4_url, video_title=post.title) }}" role="button">Upload</a></small>
+						<small class="text-muted">{{ post.date_posted_local.strftime("%b %-d, %Y %-I:%M %p") }}&nbsp;&nbsp;&nbsp;</small>
+						
+						<!-- checkbox for upload -->
+						<div class="card-text form-check">
+							<input class="form-check-input" type="checkbox" id="video_checkbox{{ loop.index }}" name="video_upload" value="{{ post.mp4_url }}|{{ post.title }}">
+							<label class="form-check-label" for="video_checkbox{{ loop.index }}">
+								<strong>Upload</strong>
+							</label>
+						</div>
 					</div>
 				</div>
 	        {% endfor %}
-	    </div>
+	    </form>
 	{% else %}
 	<p>No recent videos for the sport.</p>
 	{% endif %}

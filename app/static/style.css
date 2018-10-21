@@ -34,3 +34,8 @@ body {
 	max-width: 600px;
 	margin-bottom: 10px;
 }
+
+#get_reddit_videos_navbar {
+	padding-top: 4rem;
+	margin-top: -4rem;
+}

@@ -21,7 +21,7 @@
 		<div class="row">
 		{% for link in videos %}
 			<div class="card card_video border-light">
-				<video class="card-img-top" controls><source src="{{ link.url }}" type="video/mp4"></video>
+				<video class="card-img-top" controls loop><source src="{{ link.url }}" type="video/mp4"></video>
 				<div class="card-body">
 					<h5 class="card-title">{{ link.text }}</h5>
 					<small class="text-muted"><a href="{{ url_for('event_page', page_title=link.title) }}">{{ link.title }}</a></small>
