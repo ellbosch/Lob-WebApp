@@ -12,12 +12,22 @@ import pytz
 import json
 
 
-channels = Channel.query.join(Category, Channel.id_cat==Category.id).add_columns(Category.title).all()
-application.jinja_env.globals['CHANNELS'] = channels
+application.jinja_env.globals['CHANNELS'] = Channel.query.join(Category, Channel.id_cat==Category.id).add_columns(Category.title).all()
 
 @application.route('/')
 def home_page():
-	return render_template('index.html')
+	videos = []
+	events = []
+	channels = Channel.query.join(Category, Category.id==Channel.id_cat).add_columns(Category.title).all()
+
+	for channel in channels:
+		# get all nested events
+		events = [event.title for event in get_nested_events_for_cat(channel)]
+
+		# get all videos, sorted by upload time
+		videos = get_nested_videos_for_cat(channel)
+
+	return render_template('home_page.html', events=events, videos=videos)
 
 ''' ************************************
 	LOGIN / REGISTRATION
@@ -460,7 +470,8 @@ def get_nested_events_for_cat(cat_root):
 		for event in events:
 			events_set.add(event)
 
-	return events_set
+	# return sorted sets
+	return sorted(events_set, key=lambda x: x.start_time, reverse=True)
 
 def get_videos_for_event(title):
 	return VideoLinkToEvent.query.\

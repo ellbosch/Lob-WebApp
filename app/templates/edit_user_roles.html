@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if user == None %}
+	<h1>No user found!</h1>
+{% else %}
+	<h1>Edit Roles for {{ user.username }}</h1>
+
+	<form class="form-group">
+		{{ form.hidden_tag() }}
+		<div class="form-group">
+			{{ form.roles.label }}
+			{{ form.roles(class_="form-control", default=["3"])}}
+		</div>
+
+		<!-- submit button -->
+	    <input id="submit" name="submit" type="submit" value="Submit" class="btn btn-primary btn-lg btn-block">
+	</form>
+
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Admin User Access</h1>
+
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th scope="col">First</th>
+			<th scope="col">Last</th>
+			<th scope="col">Username</th>
+			<th scope="col">Email</th>
+			<th scope="col">Roles</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for user in users %}
+			<tr>
+				<td>{{ user.firstname }}</td>
+				<td>{{ user.lastname }}</td>
+				<td><a href="{{ url_for('user_page', username=user.username) }}">{{ user.username }}</a></td>
+				<td>{{ user.email }}</td>
+				<td>
+					{% for role in user.roles %}
+						<!-- append a comma if the list is still iterating -->
+						{% if loop.index != roles|length %}
+							{{ role.name }}
+						{% else %}
+							{{ role.name }},
+						{% endif %}
+					{% endfor %}
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+
+{% endblock %}
