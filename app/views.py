@@ -129,13 +129,13 @@ def category_submission():
 		if form.validate_on_submit():
 			#  add new category to db
 			category = Category(title=form.category_title.data, category_type=form.category_type.data,
-				created_at=datetime.utcnow())
+				created_at=datetime.utcnow(), created_by=current_user.id)
 			db.session.add(category)
 
 			# iterate through each selected parent category and add a link to the db
 			for cat in form.parent_category.data:
 				categorylink = LinkToCategory(title_from=category.title, namespace_from="category",
-					title_to=cat.title, created_at=datetime.utcnow())
+					title_to=cat.title, created_at=datetime.utcnow(), created_by=current_user.id)
 				db.session.add(categorylink)
 			db.session.commit()
 

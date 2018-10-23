@@ -4,22 +4,22 @@
 <h1>Category Submission</h1>
 <form action="" method="post">
     {{ form.hidden_tag() }}
-    <p>
-        {{ form.category_title.label }}<br>
-        {{ form.category_title(size=32) }}<br>
+    <div class="form-group">
+        {{ form.category_title.label }}
+        {{ form.category_title(class_="form-control") }}
         {% for error in form.category_title.errors %}
             <span style="color: red;">{{ error }}</span>
         {% endfor %}
-    </p>
-    <p>
-        {{ form.category_type.label }}<br>
-        {{ form.category_type }}
-    </p>
-    <p>
-        {{ form.parent_category.label }}<br>
-        {{ form.parent_category }}
-    </p>
-    <p>{{ form.submit() }}</p>
+    </div>
+    <div class="form-group">
+        {{ form.category_type.label }}
+        {{ form.category_type(class_="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.parent_category.label }}
+        {{ form.parent_category(class_="form-control", size=8) }}
+    </div>
+    <input id="submit" name="submit" type="submit" value="Submit" class="btn btn-primary btn-lg btn-block">
 </form>
 
 {% endblock %}
