@@ -437,8 +437,8 @@ def event_page(page_title):
 @roles_accepted('admin')
 def reddit_videos(league):
 	if request.method == 'POST':
-		# get list of all videos to post to event
-		videos_to_upload = request.form.getlist('video_upload')
+		# get list of all videos to post to event, and reverse them so oldest videos appear first
+		videos_to_upload = list(reversed(request.form.getlist('video_upload')))
 		
 		# make get request back to reddit_videos if no video selected
 		if len(videos_to_upload) == 0:
