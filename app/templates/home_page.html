@@ -2,8 +2,17 @@
 {% block content %}
 
 {% if not current_user.is_authenticated %}
-	<h1 style="text-align: center;">Coming Soon!</h1>
+	<div style="text-align: center;">
+		<h1 class="display-4">Lob: Community-Driven TV</h1>
+		<br>
+		<a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-block btn-lg" role="button" aria-pressed="true">Join the Private Beta</a>
 
+	</div>
+
+{% elif current_user.roles|length == 0 %}
+<div class="alert alert-info" role="alert">
+	<strong>Your sign-up for private beta is waiting approval.</strong>
+</div>
 {% else %}
 <!-- show events -->
 	{% if events|length > 0 %}

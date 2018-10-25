@@ -2,7 +2,7 @@ from app import application, db, models, forms, user_datastore, sample_data, sec
 from app.forms import RegistrationForm, CategorySubmissionForm, ChannelCreationForm, EventSubmissionForm, VideoSubmissionForm, UserRoleForm
 from app.models import *
 from flask import render_template, request, jsonify, flash, redirect, url_for, Markup
-from flask_security import current_user, login_required, logout_user
+from flask_security import current_user, login_required, login_user, logout_user
 from flask_security.utils import hash_password, verify_and_update_password
 from flask_security.decorators import roles_required, roles_accepted
 from datetime import datetime, timedelta
@@ -50,19 +50,23 @@ def login():
 @application.route('/register', methods=['GET', 'POST'])
 # @roles_accepted('admin', 'moderator')						# DELETE THIS!
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('home_page'))
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        user_datastore.create_user(username=form.username.data, email=form.email.data,
-        			password=hash_password(form.password.data),
-        			firstname=form.firstname.data, lastname=form.lastname.data,
-        			created_at=datetime.utcnow(), login_count=0)
+	if current_user.is_authenticated:
+		return redirect(url_for('home_page'))
+	form = RegistrationForm()
+	if form.validate_on_submit():
+		user_datastore.create_user(username=form.username.data, email=form.email.data,
+				password=hash_password(form.password.data),
+				firstname=form.firstname.data, lastname=form.lastname.data,
+				created_at=datetime.utcnow(), login_count=0)
+		db.session.commit()
 
-        db.session.commit()
-        flash('You have successfully registered your account!')
-        return redirect(url_for('home_page'))
-    return render_template('security/register_user.html', title='Register', form=form)
+		user = User.query.filter_by(username=form.username.data).all()
+		if len(user) == 1 and user[0] != None:
+			login_user(user[0])
+
+		flash('You have successfully registered your account!')
+		return redirect(url_for('home_page'))
+	return render_template('security/register_user.html', title='Register', form=form)
 
 @application.route('/load_sample_data', methods=['GET', 'POST'])
 @roles_accepted('admin')
