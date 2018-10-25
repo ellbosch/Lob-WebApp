@@ -7,16 +7,42 @@
 {% else %}
 	<h1>Edit Roles for {{ user.username }}</h1>
 
-	<form class="form-group">
+	<form action="" method="post">
 		{{ form.hidden_tag() }}
-		<div class="form-group">
-			{{ form.roles.label }}
-			{{ form.roles(class_="form-control", default=["3"])}}
+		
+		<!-- beta user -->
+		<div class="form-check">
+			{% if 'beta_user' in user.roles %}
+				{{ form.is_beta_user(class_="form-check-input", type="checkbox", id="checkbox_beta_user", checked=1) }}
+			{% else %}
+				{{ form.is_beta_user(class_="form-check-input", type="checkbox", id="checkbox_beta_user") }}
+			{% endif %}
+			{{ form.is_beta_user.label(class_="form-check-label", for="checkbox_beta_user") }}
+		</div>
+
+		<!-- moderator -->
+		<div class="form-check">
+			{% if 'moderator' in user.roles %}
+				{{ form.is_moderator(class_="form-check-input", type="checkbox", id="checkbox_moderator", checked=1) }}
+			{% else %}
+				{{ form.is_moderator(class_="form-check-input", type="checkbox", id="checkbox_moderator") }}
+			{% endif %}
+			{{ form.is_moderator.label(class_="form-check-label", for="checkbox_moderator") }}
+		</div>
+
+		<!-- admin -->
+		<div class="form-check">
+			{% if 'admin' in user.roles %}
+				{{ form.is_admin(class_="form-check-input", type="checkbox", id="checkbox_admin", checked=1) }}
+			{% else %}
+				{{ form.is_admin(class_="form-check-input", type="checkbox", id="checkbox_admin") }}
+			{% endif %}
+			{{ form.is_admin.label(class_="form-check-label", for="checkbox_admin") }}
 		</div>
 
 		<!-- submit button -->
 	    <input id="submit" name="submit" type="submit" value="Submit" class="btn btn-primary btn-lg btn-block">
-	</form>
+	<form action="" method="post">
 
 {% endif %}
 

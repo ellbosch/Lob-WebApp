@@ -22,8 +22,8 @@ def get_all_leagues():
 def get_all_teams():
 	return Category.query.filter_by(category_type="sports_team").order_by(Category.title).all()
 
-def get_roles():
-	return Role.query.all()
+# def get_roles():
+# 	return Role.query.all()
 
 """
 HELPER FUNCTIONS
@@ -157,6 +157,9 @@ class VideoSubmissionForm(FlaskForm):
 	submit = SubmitField('Submit')
 
 class UserRoleForm(FlaskForm):
-	roles = QuerySelectMultipleField(label='Select Roles', query_factory=get_roles,
-		get_label='name', default=["3"])
+	# roles = QuerySelectMultipleField(label='Select Roles', query_factory=get_roles,
+		# get_label='name', default=["3"])
+	is_beta_user = BooleanField('Beta User')
+	is_moderator = BooleanField('Moderator')
+	is_admin = BooleanField('Admin')
 

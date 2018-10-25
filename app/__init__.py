@@ -50,6 +50,14 @@ security = Security(application, user_datastore, login_form=ExtendedLoginForm)
 # user_datastore.create_role(name='moderator')
 # user_datastore.create_role(name='beta_user')
 
+# makes admin an "admin" again
+# user = User.query.filter_by(username='admin').first()
+# user = user_datastore.get_user(user.id)
+# admin = user_datastore.find_role('admin')
+# user_datastore.add_role_to_user(user, admin)
+# db.session.commit()
+
+
 # from flask_security.utils import hash_password
 # from datetime import datetime
 # with application.app_context():
@@ -57,6 +65,6 @@ security = Security(application, user_datastore, login_form=ExtendedLoginForm)
 # 					password=hash_password('Cupcake2777'), roles=['admin'],
 # 					firstname="lebron", lastname="james", 
 # 					created_at=datetime.utcnow(), login_count=0)
-# 	db.session.commit()
+# db.session.commit()
 
 from app import views

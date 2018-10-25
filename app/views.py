@@ -83,29 +83,46 @@ def user_access():
 	return render_template('user_access.html', users=User.query.all())
 
 # admin page to change user roles
-@application.route('/settings/user_access/<username>')
+@application.route('/settings/user_access/<username>', methods=['GET', 'POST'])
 @roles_accepted('admin')
 def edit_user_roles(username):
 	#  query for user
 	user = User.query.filter_by(username=username).first()
+	user = user_datastore.get_user(user.id)
 	
 	if request.method == 'POST':
 		form = UserRoleForm()
 		if form.validate_on_submit():
 			roles = []
 
-			# iterate through each selected parent category and add a link to the db
-			for role in form.roles.data:
-				roles.append(Role.get(role.id))
+			# find roles
+			beta_user = user_datastore.find_role('beta_user') 
+			moderator = user_datastore.find_role('moderator') 
+			admin = user_datastore.find_role('admin')
 
-			user.roles = roles
+			# check each selected parent category and add a link to the db
+			if form.is_beta_user.data:# and not user.has_role(beta_user):
+				user_datastore.add_role_to_user(user, beta_user)
+			else:
+				user_datastore.remove_role_from_user(user, beta_user)
+
+			if form.is_moderator.data:# and not user.has_role(moderator):
+				user_datastore.add_role_to_user(user, moderator)
+			else:
+				user_datastore.remove_role_from_user(user, moderator)
+
+			if form.is_admin.data:# and not user.has_role(admin):
+				user_datastore.add_role_to_user(user, admin)
+			else:
+				user_datastore.remove_role_from_user(user, admin)
+
 			db.session.commit()
 
 			flash('User roles edited.')
-			# return redirect(url_for('category_page', page_title=category.title))
 	else:
 		# adds params to form, if provided
 		form = UserRoleForm()
+	
 	return render_template('edit_user_roles.html', form=form, user=user)
 
 # user page

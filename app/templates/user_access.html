@@ -18,7 +18,7 @@
 			<tr>
 				<td>{{ user.firstname }}</td>
 				<td>{{ user.lastname }}</td>
-				<td><a href="{{ url_for('user_page', username=user.username) }}">{{ user.username }}</a></td>
+				<td><a href="{{ url_for('edit_user_roles', username=user.username) }}">{{ user.username }}</a></td>
 				<td>{{ user.email }}</td>
 				<td>
 					{% for role in user.roles %}
