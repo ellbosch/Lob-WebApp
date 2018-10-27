@@ -308,7 +308,7 @@ def video_submission_next():
 	queue = request.args.get('queue')
 
 	# if there's no queue, don't pass along queue into request
-	if queue == '[]':
+	if queue == '[]' or queue == None:
 		return redirect(url_for('reddit_videos'))
 
 	# unpack json

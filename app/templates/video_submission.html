@@ -29,20 +29,19 @@
 
     {% if queue != None %}
         <div class="row">
-            <div class="form-group col-sm-4">
+            <div class="form-group col-sm-6">
                 <input id="submit" name="submit" type="submit" value="Submit" class="btn btn-primary btn-lg btn-block">
             </div>
   <!--           <div class="form-group col-sm-4">
                 <input name="cancel" type="submit" value="Cancel" class="btn btn-light btn-lg btn-block">
             </div> -->
-            <div class="form-group col-sm-4">
-                <a class="btn btn-danger btn-lg btn-block" href="{{ url_for('video_submission_next', queue=queue) }}" role="button">Cancel</a>
+            <div class="form-group col-sm-6">
+                <a class="btn btn-light btn-lg btn-block" href="{{ url_for('video_submission_next', queue=queue) }}" role="button">Cancel</a>
             </div>
         </div>
     {% else %}
         <input id="submit" name="submit" type="submit" value="Submit" class="btn btn-primary btn-lg btn-block">
     {% endif %}
-
 </form>
 
 {% endblock %}
