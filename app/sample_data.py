@@ -10,15 +10,48 @@ TEAMS_MLB = [
 	"Houston Astros"
 ]
 
+TEAMS_NBA = [
+	"Atlanta Hawks",
+	"Boston Celtics",
+	"Brooklyn Nets",
+	"Charlotte Hornets",
+	"Chicago Bulls",
+	"Cleveland Cavaliers",
+	"Dallas Mavericks",
+	"Denver Nuggets",
+	"Detroit Pistons",
+	"Golden State Warriors",
+	"Houston Rockets",
+	"Indiana Pacers",
+	"LA Clippers",
+	"Los Angeles Lakers",
+	"Memphis Grizzlies",
+	"Miami Heat",
+	"Milwaukee Bucks",
+	"Minnesota Timberwolves",
+	"New Orleans Pelicans",
+	"New York Knicks",
+	"Oklahoma City Thunder",
+	"Orlando Magic",
+	"Philadelphia 76ers",
+	"Phoenix Suns",
+	"Portland Trail Blazers",
+	"Sacramento Kings",
+	"San Antonio Spurs",
+	"Toronto Raptors",
+	"Utah Jazz",
+	"Washington Wizards"
+]
+
 def load(user_id):
 # load sample data (if not already loaded)
 	if len(Category.query.all()) == 0:
 		sports_cat = Category(created_by=user_id, title="Sports", category_type="default", created_at=datetime.utcnow())
 		db.session.add(sports_cat)
 		
-		setup_sport("MLB", user_id)
+	setup_sport("NBA", user_id)
 
-		db.session.commit()
+	db.session.commit()
 
 def setup_sport(league, user_id):
 	teams = []
@@ -27,6 +60,9 @@ def setup_sport(league, user_id):
 	if league == "MLB":
 		sport = "Baseball"
 		teams = TEAMS_MLB
+	elif league == "NBA":
+		sport = "Basketball"
+		teams = TEAMS_NBA
 	else:
 		return
 
@@ -53,6 +89,9 @@ def setup_sport(league, user_id):
 	for team in teams:
 		cat = Category(created_by=user_id, title=team, category_type="sports_team", created_at=datetime.utcnow())
 		link = LinkToCategory(created_by=user_id, title_from=team, namespace_from="category", title_to="%s Teams" % league, created_at=datetime.utcnow())
-		db.session.add(cat)
-		db.session.add(link)
-
+		
+		try:
+			db.session.add(cat)
+			db.session.add(link)
+		except Exception as e:
+			pass

@@ -1,6 +1,6 @@
 from app.models import *
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, DateTimeField, RadioField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, DateTimeField, RadioField, HiddenField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from wtforms.fields.html5 import DateTimeField
@@ -154,6 +154,8 @@ class VideoSubmissionForm(FlaskForm):
 	video_title = StringField('Video Title', validators=[DataRequired()])
 	parent_events = QuerySelectMultipleField(label='Upload to Event Pages',
 		query_factory=get_all_events, get_label='title', validators=[DataRequired()])
+	# queue = HiddenField('Queue')
+
 	submit = SubmitField('Submit')
 
 class UserRoleForm(FlaskForm):

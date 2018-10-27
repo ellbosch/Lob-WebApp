@@ -74,7 +74,7 @@ def load_sample_data():
 	if current_user.id != None:
 		sample_data.load(current_user.id)
 
-	return render_template('index.html')
+	return render_template('home_page.html')
 
 
 ''' ************************************
@@ -258,6 +258,8 @@ def event_submission():
 @application.route('/video_submission', methods=['GET', 'POST'])
 @roles_accepted('admin', 'moderator')
 def video_submission():
+	queue=request.args.getlist('queue')
+
 	if request.method == 'POST':
 		form = VideoSubmissionForm()
 		if form.validate_on_submit():
@@ -289,25 +291,39 @@ def video_submission():
 			flash('New video posted!')
 
 			# redirect to next video to upload if queue not empty
-			queue = request.args.getlist('queue')
-			if len(queue) > 0:				
-				# pop first video from queue for form
-				video_data = queue.pop().split('|')
-				video_url = video_data[0]
-				video_title = video_data[1]
-
-				return redirect(url_for('video_submission', video_url=video_url,
-					video_title=video_title, queue=queue))
-			else:
-				return redirect(url_for('reddit_videos', league='mlb'))
+			return redirect(url_for('video_submission_next', queue=queue))
 
 			# return redirect(url_for('video_page', video_id=video.id))
 			render_template('video_submission.html', title='Submit New Video', form=form)
 	else:
 		# adds params to form, if provided
 		form = VideoSubmissionForm(request.args)
-	return render_template('video_submission.html', title='Submit New Video', form=form)
+	return render_template('video_submission.html', title='Submit New Video', form=form,
+		queue=queue)
 
+# go to next video in queue for video submission
+@application.route('/video_submission_next/', methods=['GET'])
+@roles_accepted('admin', 'moderator')
+def video_submission_next():
+	queue = request.args.get('queue')
+
+	# if there's no queue, don't pass along queue into request
+	if queue == '[]':
+		return redirect(url_for('reddit_videos'))
+
+	# unpack json
+	queue = json.loads(queue)
+
+	# pop first video from queue for form
+	video_data = queue.pop().split('|')
+	video_url = video_data[0]
+	video_title = video_data[1]
+
+	# convert queue back to json for call
+	queue_json = json.dumps(queue)
+
+	return redirect(url_for('video_submission', video_url=video_url, video_title=video_title,
+		queue=queue_json))
 
 ''' ************************************
 	PAGE VIEWS
@@ -433,13 +449,14 @@ def event_page(page_title):
 	VIEW SCRAPED VIDEOS (SSSSHHHHHH)
 	************************************'''
 @application.route('/reddit_videos/<league>', methods=['GET', 'POST'])
+@application.route('/reddit_videos', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin')
-def reddit_videos(league):
+def reddit_videos(league='mlb'):
 	if request.method == 'POST':
 		# get list of all videos to post to event, and reverse them so oldest videos appear first
 		videos_to_upload = list(reversed(request.form.getlist('video_upload')))
-		
+
 		# make get request back to reddit_videos if no video selected
 		if len(videos_to_upload) == 0:
 			flash('No video selected!')
@@ -450,14 +467,12 @@ def reddit_videos(league):
 		video_url = video_data[0]
 		video_title = video_data[1]
 
-		return redirect(url_for('video_submission', video_url=video_url,
-			video_title=video_title, queue=videos_to_upload))
-	else:
+		queue_json = json.dumps(videos_to_upload)
 
-		if league == None:
-			return redirect(url_for('reddit_videos', league="nfl"))
-		
-		supported_leagues = ["baseball", "nfl"]
+		return redirect(url_for('video_submission', video_url=video_url,
+			video_title=video_title, queue=queue_json))
+	else:		
+		supported_leagues = ["baseball", "nfl", "nba"]
 		posts_filted = None
 		league = league.lower()
 
@@ -466,7 +481,7 @@ def reddit_videos(league):
 			league = "baseball"
 
 		# check to see if there are params for days to look back
-		days_back = 2
+		days_back = 1
 		if request.args.get('days_back') != None:
 			days_back = int(request.args.get('days_back'))
 
