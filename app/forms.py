@@ -162,6 +162,7 @@ class UserRoleForm(FlaskForm):
 	# roles = QuerySelectMultipleField(label='Select Roles', query_factory=get_roles,
 		# get_label='name', default=["3"])
 	is_beta_user = BooleanField('Beta User')
+	is_scraper = BooleanField('Scraper')
 	is_moderator = BooleanField('Moderator')
 	is_admin = BooleanField('Admin')
 

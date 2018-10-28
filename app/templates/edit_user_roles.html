@@ -20,6 +20,16 @@
 			{{ form.is_beta_user.label(class_="form-check-label", for="checkbox_beta_user") }}
 		</div>
 
+		<!-- scraper -->
+		<div class="form-check">
+			{% if 'scraper' in user.roles %}
+				{{ form.is_scraper(class_="form-check-input", type="checkbox", id="checkbox_scraper", checked=1) }}
+			{% else %}
+				{{ form.is_scraper(class_="form-check-input", type="checkbox", id="checkbox_scraper") }}
+			{% endif %}
+			{{ form.is_scraper.label(class_="form-check-label", for="checkbox_scraper") }}
+		</div>
+
 		<!-- moderator -->
 		<div class="form-check">
 			{% if 'moderator' in user.roles %}

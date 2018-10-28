@@ -100,7 +100,8 @@ def edit_user_roles(username):
 			roles = []
 
 			# find roles
-			beta_user = user_datastore.find_role('beta_user') 
+			beta_user = user_datastore.find_role('beta_user')
+			scraper = user_datastore.find_role('scraper')
 			moderator = user_datastore.find_role('moderator') 
 			admin = user_datastore.find_role('admin')
 
@@ -109,6 +110,11 @@ def edit_user_roles(username):
 				user_datastore.add_role_to_user(user, beta_user)
 			else:
 				user_datastore.remove_role_from_user(user, beta_user)
+
+			if form.is_scraper.data:# and not user.has_role(scraper):
+				user_datastore.add_role_to_user(user, scraper)
+			else:
+				user_datastore.remove_role_from_user(user, scraper)
 
 			if form.is_moderator.data:# and not user.has_role(moderator):
 				user_datastore.add_role_to_user(user, moderator)
@@ -451,7 +457,7 @@ def event_page(page_title):
 @application.route('/reddit_videos/<league>', methods=['GET', 'POST'])
 @application.route('/reddit_videos', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('admin')
+@roles_accepted('admin', 'scraper')
 def reddit_videos(league='mlb'):
 	if request.method == 'POST':
 		# get list of all videos to post to event, and reverse them so oldest videos appear first

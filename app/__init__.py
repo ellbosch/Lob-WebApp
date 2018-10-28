@@ -49,6 +49,7 @@ security = Security(application, user_datastore, login_form=ExtendedLoginForm)
 # user_datastore.create_role(name='admin')
 # user_datastore.create_role(name='moderator')
 # user_datastore.create_role(name='beta_user')
+# user_datastore.create_role(name='scraper')
 
 # makes admin an "admin" again
 # user = User.query.filter_by(username='admin').first()
