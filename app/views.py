@@ -321,9 +321,9 @@ def video_submission_next():
 	queue = json.loads(queue)
 
 	# pop first video from queue for form
-	video_data = queue.pop().split('|')
-	video_url = video_data[0]
-	video_title = video_data[1]
+	video_data = Videopost.query.get(queue.pop())
+	video_url = video_data.mp4_url
+	video_title = video_data.title
 
 	# convert queue back to json for call
 	queue_json = json.dumps(queue)
@@ -469,9 +469,9 @@ def reddit_videos(league='mlb'):
 			return redirect(url_for('reddit_videos', league=league))
 
 		# pop first video from queue for form
-		video_data = videos_to_upload.pop().split('|')
-		video_url = video_data[0]
-		video_title = video_data[1]
+		video_data = Videopost.query.get(videos_to_upload.pop())
+		video_url = video_data.mp4_url
+		video_title = video_data.title
 
 		queue_json = json.dumps(videos_to_upload)
 

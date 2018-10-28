@@ -39,7 +39,7 @@
 						
 						<!-- checkbox for upload -->
 						<div class="card-text form-check">
-							<input class="form-check-input" type="checkbox" id="video_checkbox{{ loop.index }}" name="video_upload" value="{{ post.mp4_url }}|{{ post.title }}" checked>
+							<input class="form-check-input" type="checkbox" id="video_checkbox{{ loop.index }}" name="video_upload" value="{{ post.id }}" checked>
 							<label class="form-check-label" for="video_checkbox{{ loop.index }}">
 								<strong>Upload</strong>&emsp;<a href="{{ url_for('video_submission', video_title=post.title, video_url=post.mp4_url) }}">Upload this video only.</a>
 							</label>
