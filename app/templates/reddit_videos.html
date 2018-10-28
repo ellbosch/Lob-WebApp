@@ -35,7 +35,7 @@
 					<video class="card-img-top" controls playsinline muted preload="auto"><source src="{{ post.mp4_url }}" type="video/mp4"></video>
 					<div class="card-body">
 						<h5 class="card-title">{{ post.title }}</h5>
-						<small class="text-muted">{{ post.date_posted_local.strftime("%b %-d, %Y %-I:%M %p") }}&nbsp;&nbsp;&nbsp;</small>
+						<small class="text-muted timestamp" value="{{ post.date_posted }}">{{ post.date_posted.strftime("%b %-d, %Y %-I:%M %p") }}&nbsp;&nbsp;&nbsp;</small>
 						
 						<!-- checkbox for upload -->
 						<div class="card-text form-check">
@@ -52,5 +52,52 @@
 	<p>No recent videos for the sport.</p>
 	{% endif %}
 {% endif %}
+
+<script type="text/javascript">
+	var elems = document.getElementsByClassName("timestamp");
+
+	// edit html for time posted
+	for (i = 0; i < elems.length; i++) {
+		var ts = elems[i].getAttribute("value");
+		var year = ts.substring(0, 4);
+		var month = parseInt(ts.substring(5, 7)) - 1;
+		var date = ts.substring(8, 10);
+		var hours = ts.substring(11, 13);
+		var minutes = ts.substring(14, 16);
+		var seconds = ts.substring(17, 19);
+
+		var date_posted = new Date(Date.UTC(year, month, date, hours, minutes, seconds));
+		var date_now = new Date();
+		var timedelta = date_now - date_posted;
+		var years_ago = parseInt(timedelta / (1000 * 60 * 60 * 24 * 365));
+		var months_ago = parseInt(timedelta / (1000 * 60 * 60 * 24 * 30));
+		var days_ago = parseInt(timedelta / (1000 * 60 * 60 * 24));
+		var hours_ago = parseInt(timedelta / (1000 * 60 * 60));
+		var minutes_ago = parseInt(timedelta / (1000 * 60));
+		
+		// CREATE FRIENDLY STRING TO DESCRIBE WHEN VIDEO WAS POSTED
+		if (years_ago > 1) {
+			elems[i].innerHTML = years_ago + " years ago";
+		} else if (years_ago == 1) {
+			elems[i].innerHTML = years_ago + " year ago";
+		} else if (months_ago > 1) {
+			elems[i].innerHTML = months_ago + " months ago";
+		} else if (months_ago == 1) {
+			elems[i].innerHTML = months_ago + " month ago";
+		} else if (days_ago > 1) {
+			elems[i].innerHTML = days_ago + " days ago";
+		} else if (days_ago == 1) {
+			elems[i].innerHTML = days_ago + " day ago";
+		} else if (hours_ago > 1) {
+			elems[i].innerHTML = hours_ago + " hours ago";
+		} else if (hours_ago == 1) {
+			elems[i].innerHTML = hours_ago + " hour ago";
+		} else if (minutes_ago > 1) {
+			elems[i].innerHTML = minutes_ago + " minutes ago";
+		} else {
+			elems[i].innerHTML = minutes_ago + " minute ago";
+		}
+	}
+</script>
 
 {% endblock %}

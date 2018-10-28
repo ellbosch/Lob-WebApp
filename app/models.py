@@ -1,19 +1,19 @@
 from app import db
 from flask_security import UserMixin, RoleMixin
 from sqlalchemy.ext.hybrid import hybrid_property
-from datetime import datetime
-from dateutil import tz
+from datetime import datetime, timedelta
+# from dateutil import tz
 import enum
 
 
 # helper functions
-def convert_utc_to_local(timestamp):
-    from_zone = tz.tzutc()
-    to_zone = tz.tzlocal()
+# def convert_to_utc(timestamp):
+#     from_zone = tz.tzutc()
+#     to_zone = tz.tzlocal()
 
-    utc = timestamp.replace(tzinfo=from_zone)
-    local = utc.astimezone(to_zone)
-    return local
+#     utc = timestamp.replace(tzinfo=from_zone)
+#     local = utc.astimezone(to_zone)
+#     return local
 
 
 """
@@ -106,13 +106,13 @@ class Event(db.Model):
     created_at = db.Column(db.DateTime, nullable=False)
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-    @hybrid_property
-    def start_time_local(self):
-        return convert_utc_to_local(self.start_time)
+    # @hybrid_property
+    # def start_time_local(self):
+    #     return convert_utc_to_local(self.start_time)
 
-    @hybrid_property
-    def end_time_local(self):
-        return convert_utc_to_local(self.end_time)
+    # @hybrid_property
+    # def end_time_local(self):
+    #     return convert_utc_to_local(self.end_time)
 
 
 # links either category or event pages to other categories, creating the orgaized structure of the site
@@ -208,9 +208,9 @@ class Videopost(db.Model):
         self.mp4_url = mp4_url
 
 
-    @hybrid_property
-    def date_posted_local(self):
-        return convert_utc_to_local(self.date_posted)
+    # @hybrid_property
+    # def date_posted_utc(self):
+    #     return self.date_posted + timedelta(hours=1)
 
     # serialize for json consumption
     @property
