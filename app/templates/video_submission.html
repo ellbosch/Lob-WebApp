@@ -11,7 +11,7 @@
             <span style="color: red;">{{ error }}</span>
         {% endfor %}
     </div>
-    <video id="video_preview" controls autoplay playsinline muted preload="auto"><source src="{{ form.video_url.data }}" type="video/mp4"></video>
+    <video id="video_preview" autoplay muted loop controls playsinline preload="auto"><source src="{{ form.video_url.data }}" type="video/mp4"></video>
     <div class="form-group">
         {{ form.video_title.label }}
         {{ form.video_title(class_="form-control") }}
