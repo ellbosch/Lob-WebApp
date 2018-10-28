@@ -48,7 +48,7 @@
 						</div>
 					</li>
 
-					{% if "admin" in current_user.roles %}
+					{% if "admin" in current_user.roles or "scraper" in current_user.roles %}
 						<li class="nav-item">
 							<a class="nav-link" href="{{ url_for('reddit_videos', league='MLB') }}">Get Videos</a>
 						</li>
