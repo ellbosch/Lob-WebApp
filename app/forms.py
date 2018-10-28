@@ -14,7 +14,7 @@ def get_all_categories():
 	return Category.query.all()
 
 def get_all_events():
-	return Event.query.all()
+	return Event.query.order_by(db.desc(Event.start_time)).all()
 
 def get_all_leagues():
 	return Category.query.filter_by(category_type="sports_league").order_by(Category.title).all()
