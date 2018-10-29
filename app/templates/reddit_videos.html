@@ -23,6 +23,7 @@
 			</ul>
 		</div>
 	</div>
+	<br>
 
 	{% if posts|length > 0 %}
 		<form action="" method="post">
@@ -32,7 +33,7 @@
 
 			{% for post in posts %}
 				<div class="card card_video border-light">
-					<video class="card-img-top" controls playsinline muted preload="auto"><source src="{{ post.mp4_url }}" type="video/mp4"></video>
+					<video class="card-img-top" controls loop playsinline muted preload="auto"><source src="{{ post.mp4_url }}" type="video/mp4"></video>
 					<div class="card-body">
 						<h5 class="card-title">{{ post.title }}</h5>
 						<small class="text-muted timestamp" value="{{ post.date_posted }}">{{ post.date_posted.strftime("%b %-d, %Y %-I:%M %p") }}&nbsp;&nbsp;&nbsp;</small>

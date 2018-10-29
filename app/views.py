@@ -25,7 +25,7 @@ def home_page():
 
 	for channel in channels:
 		# get all nested events
-		events.extend([event.title for event in get_nested_events_for_cat(channel)])
+		events.extend([event.title for event in get_nested_events_for_cat(channel, days_back=2)])
 
 		# get all videos, sorted by upload time
 		videos.extend(get_nested_videos_for_cat(channel))
@@ -411,18 +411,44 @@ def channel_page(page_title):
 		subcategories = [cat.title for cat in get_subcats_for_cat(title)]
 
 		# get all nested events
-		events = [event.title for event in get_nested_events_for_cat(category_page)]
+		events = [event.title for event in get_nested_events_for_cat(category_page, days_back=2)]
 
 		# get all videos, sorted by upload time
 		videos = get_nested_videos_for_cat(category_page)
 
-		# get all videos for each event, organized by event
-		# videos_per_event = {}
-		# for event in events:
-		# 	videos_per_event[event] = get_videos_for_event(event)
-
 		return render_template('channel_page.html', title=title, parent_categories=parent_categories,
 			subcategories=subcategories, events=events, videos=videos)
+
+# view all events for a channel
+@application.route('/channel/<page_title>/events', methods=['GET'])
+@application.route('/<page_title>/events', methods=['GET'])
+@roles_accepted('admin', 'moderator', 'beta_user')
+def channel_page_events(page_title):
+	# redirect if url has spaces (we convert them to underscores for friendlier urls)
+	if ' ' in page_title:
+		return redirect(url_for('channel_page', page_title=page_title.replace(' ', '_')))
+
+	title = page_title.replace('_', ' ')	# replace underscores with spaces
+	
+	# look for the category page of the channel, which contains the metadata
+	category_page = Category.query.filter_by(title=title).first()
+
+	# if no channel page, redirect to category
+	if category_page is None:
+		return redirect(url_for('category_page', page_title=title))
+	else:
+		# checks to see if a channel has been made
+		channel_page = Channel.query.get(category_page.id)
+		
+		if channel_page is None:
+			return redirect(url_for('category_page', page_title=title))
+
+		title = category_page.title 	# fixes any capitalization errors
+
+		# get all nested events
+		events = [event.title for event in get_nested_events_for_cat(category_page)]
+
+		return render_template('channel_page_events.html', title=title, events=events)
 
 # view for category page
 @application.route('/event/<page_title>/', methods=['GET'])
@@ -525,12 +551,18 @@ def get_subcats_for_cat(title):
 		filter_by(namespace_from="category", title_to=title).all()
 
 # gets events to report UP to a category
-def get_events_for_cat(title):
-	return Event.query.join(LinkToCategory, Event.title==LinkToCategory.title_from).\
-		filter_by(namespace_from="event", title_to=title).\
-		order_by(desc(Event.start_time)).all()
+def get_events_for_cat(title, days_back=None):
+	if days_back == None:
+		return Event.query.join(LinkToCategory, Event.title==LinkToCategory.title_from).\
+			filter_by(namespace_from="event", title_to=title).\
+			order_by(desc(Event.start_time)).all()
+	else:
+		return Event.query.join(LinkToCategory, Event.title==LinkToCategory.title_from).\
+			filter_by(namespace_from="event", title_to=title).\
+			filter(Event.start_time > datetime.utcnow() - timedelta(days=days_back)).\
+			order_by(desc(Event.start_time)).all()
 
-def get_nested_events_for_cat(cat_root):
+def get_nested_events_for_cat(cat_root, days_back=None):
 	events_set = set()				# the set we return
 	stack_unvisited = []			# stack of unvisited categories in BFS
 	visited = defaultdict(bool)		# hashmap of visited entries
@@ -549,7 +581,7 @@ def get_nested_events_for_cat(cat_root):
 				stack_unvisited.append(subcat)
 
 		# add events to set
-		events = get_events_for_cat(cat.title)
+		events = get_events_for_cat(cat.title, days_back)
 		for event in events:
 			events_set.add(event)
 

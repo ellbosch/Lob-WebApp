@@ -69,3 +69,21 @@ security = Security(application, user_datastore, login_form=ExtendedLoginForm)
 # db.session.commit()
 
 from app import views
+
+# import pytz
+# from datetime import datetime
+# events = models.Event.query.all()
+# tz = pytz.timezone("US/Pacific")
+# for e in events:
+# 	# print(tz.localize(datetime.utcnow()) - e.start_time)
+# 	print(e.start_time)
+# 	event = db.session.query(Event).get(e.id)
+# 	event.start_time = tz.localize(event.start_time)
+# 	print(event.start_time)
+# 	# db.session.merge(e)
+# try:
+# 	db.session.commit()
+# 	print("should work...")
+# except Exception as e:
+# 	print("??")
+# 	raise e

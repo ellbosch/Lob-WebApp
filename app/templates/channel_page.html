@@ -27,6 +27,7 @@
 			<p><a href="{{ url_for('event_page', page_title=event) }}">{{ event }}</a></p>
 		{% endfor %}
 	</p>
+	<p><strong><a href="{{ url_for('channel_page_events', page_title=title) }}">View all events.</a></strong></p>
 {% endif %}
 
 <!-- show videos -->
