@@ -27,15 +27,17 @@ $(function() {
 	});
 
 	function update_event_submit_form(obj) {
-		// show default options and hide sports options
-		if (obj.value == 'default') {
-			$('.event_sports').hide();
-			$('.event_default').show();
-		} 
-		// opposite of above
-		else {
-			$('.event_sports').show();
-			$('.event_default').hide();
+		if (obj != null) {
+			// show default options and hide sports options
+			if (obj.value == 'default') {
+				$('.event_sports').hide();
+				$('.event_default').show();
+			} 
+			// opposite of above
+			else {
+				$('.event_sports').show();
+				$('.event_default').hide();
+			}
 		}
 	}
 
