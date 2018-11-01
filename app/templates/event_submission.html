@@ -2,9 +2,9 @@
 
 {% block content %}
 <h1>Event Submission</h1>
-<form action="" method="post">
+<form action="" method="post" id="form_event_submission">
     {{ form.hidden_tag() }}
-    <div class="form-group">
+    <div class="form-group" hidden>
         {{ form.event_type.label }}
         {{ form.event_type }}
         <small class="form-text text-muted">
@@ -55,7 +55,7 @@
     </div>
 
     <!-- start and end date -->
-    <div class="form-row">
+    <div class="form-row event_sports">
         <!-- start time -->
         <div class="col-md-6 form-group">
             {{ form.start_time.label }} - <strong><span id="datetimepicker_tz_start"></span></strong>

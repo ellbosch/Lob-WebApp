@@ -11,16 +11,18 @@ from flask_security.forms import LoginForm
 QUERIES FOR QUERY SELECTORS
 """
 def get_all_categories():
-	return Category.query.all()
+	return Category.query.order_by(Category.title).all()
 
 def get_all_events():
 	return Event.query.order_by(db.desc(Event.start_time)).all()
 
 def get_all_leagues():
-	return Category.query.filter_by(category_type="sports_league").order_by(Category.title).all()
+	return Category.query.filter_by(category_type="sports_league").\
+		order_by(Category.title).all()
 
 def get_all_teams():
-	return Category.query.filter_by(category_type="sports_team").order_by(Category.title).all()
+	return Category.query.filter_by(category_type="sports_team").\
+		order_by(Category.title).all()
 
 # def get_roles():
 # 	return Role.query.all()
@@ -130,8 +132,14 @@ class EventSubmissionForm(FlaskForm):
 	event_title = StringField('New Event Title')
 
 	# for sports game matchup: automatically generate title name
+	# league = SelectField('Select League', choices=[("","-- Select League --")], coerce=str)
 	league = QuerySelectField('Select League', query_factory=get_all_leagues,
 		get_label='title')
+
+	# away_team = SelectField('Select Away Team',
+	# 	coerce=str)
+	# home_team = SelectField('Select Home Team',
+	# 	coerce=str)
 	away_team = QuerySelectField('Select Away Team', query_factory=get_all_teams,
 		get_label='title')
 	home_team = QuerySelectField('Select Home Team', query_factory=get_all_teams,
@@ -145,16 +153,12 @@ class EventSubmissionForm(FlaskForm):
 
 	submit = SubmitField('Submit')
 
-	# def check_datetime(self, start_time):
-	# 	print(start_time)
-	# 	print(type(start_time))
 
 class VideoSubmissionForm(FlaskForm):
 	video_url = StringField('Video Link (must be .mp4)', validators=[DataRequired(), validate_video_url])
 	video_title = StringField('Video Title', validators=[DataRequired()])
 	parent_events = QuerySelectMultipleField(label='Upload to Event Pages',
 		query_factory=get_all_events, get_label='title', validators=[DataRequired()])
-	# queue = HiddenField('Queue')
 
 	submit = SubmitField('Submit')
 

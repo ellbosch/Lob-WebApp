@@ -43,4 +43,13 @@ $(function() {
 
 	// update event form on load
 	update_event_submit_form($('input[type=radio][name=event_type]:checked')[0])
+
+	// change event submission form after league is selected
+	$("#league").change(function() {
+		var league = $("#league").children("option:selected").val();
+
+		var index = window.location.href.indexOf("?league=");
+		window.location.href = window.location.href.substring(0, index) + '?league=' + league;
+	});
+
 });

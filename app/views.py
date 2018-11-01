@@ -226,7 +226,7 @@ def event_submission():
 			
 			# create sports game type event
 			else:
-				league = form.league.data.title
+				league = form.league.data
 				away_team = form.away_team.data.title
 				home_team = form.home_team.data.title
 				event_title = "%s at %s: %s" % (away_team, home_team,
@@ -257,10 +257,12 @@ def event_submission():
 				return redirect(next_url)
 			else:
 				return redirect(url_for('event_page', page_title=event.title))
+		else:
+			print(form.errors)
 	else:
 		# adds params to form, if provided
 		form = EventSubmissionForm(request.args)
-	
+
 	return render_template('event_submission.html', title='Submit New Category', form=form)
 
 # submit video
@@ -543,12 +545,12 @@ def reddit_videos(league='mlb'):
 	************************************'''
 
 def get_parent_cats_for_page(title):
-	return LinkToCategory.query.filter_by(title_from=title).all()
+	return LinkToCategory.query.filter_by(title_from=title).order_by(LinkToCategory.title_from).all()
 
 # gets subcategories for a category
 def get_subcats_for_cat(title):
 	return Category.query.join(LinkToCategory, Category.title==LinkToCategory.title_from).\
-		filter_by(namespace_from="category", title_to=title).all()
+		filter_by(namespace_from="category", title_to=title).order_by(Category.title).all()
 
 # gets events to report UP to a category
 def get_events_for_cat(title, days_back=None):
@@ -607,3 +609,10 @@ def get_nested_videos_for_cat(cat):
 	videos_sorted = sorted(videos, key=lambda v: v.uploaded_at, reverse=True)
 	return videos_sorted
 
+# get teams for league
+def get_teams_for_league(league):
+	links =  LinkToCategory.query.\
+		join(Category, Category.title==LinkToCategory.title_to).\
+		filter_by(title="%s Teams" % league).order_by(LinkToCategory.title_from).all()
+
+	return [Category.query.filter_by(title=link.title_from).first() for link in links]

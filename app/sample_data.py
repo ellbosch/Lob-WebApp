@@ -23,7 +23,7 @@ TEAMS_NBA = [
 	"Golden State Warriors",
 	"Houston Rockets",
 	"Indiana Pacers",
-	"LA Clippers",
+	"Los Angeles Clippers",
 	"Los Angeles Lakers",
 	"Memphis Grizzlies",
 	"Miami Heat",
