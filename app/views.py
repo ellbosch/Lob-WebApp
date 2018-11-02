@@ -269,7 +269,8 @@ def event_submission():
 @application.route('/video_submission', methods=['GET', 'POST'])
 @roles_accepted('admin', 'moderator')
 def video_submission():
-	queue=request.args.getlist('queue')
+	queue = request.args.getlist('queue')
+	video_date = request.args.get('video_date')		# date of video for video popped from queue
 
 	if request.method == 'POST':
 		form = VideoSubmissionForm()
@@ -310,7 +311,7 @@ def video_submission():
 		# adds params to form, if provided
 		form = VideoSubmissionForm(request.args)
 	return render_template('video_submission.html', title='Submit New Video', form=form,
-		queue=queue)
+		queue=queue, video_date=video_date)
 
 # go to next video in queue for video submission
 @application.route('/video_submission_next/', methods=['GET'])
@@ -329,12 +330,15 @@ def video_submission_next():
 	video_data = Videopost.query.get(queue.pop())
 	video_url = video_data.mp4_url
 	video_title = video_data.title
+	video_date = video_data.date_posted
+	print(video_date)
+
 
 	# convert queue back to json for call
 	queue_json = json.dumps(queue)
 
 	return redirect(url_for('video_submission', video_url=video_url, video_title=video_title,
-		queue=queue_json))
+		video_date=video_date, queue=queue_json))
 
 ''' ************************************
 	PAGE VIEWS
@@ -499,15 +503,9 @@ def reddit_videos(league='mlb'):
 			flash('No video selected!')
 			return redirect(url_for('reddit_videos', league=league))
 
-		# pop first video from queue for form
-		video_data = Videopost.query.get(videos_to_upload.pop())
-		video_url = video_data.mp4_url
-		video_title = video_data.title
-
 		queue_json = json.dumps(videos_to_upload)
 
-		return redirect(url_for('video_submission', video_url=video_url,
-			video_title=video_title, queue=queue_json))
+		return redirect(url_for('video_submission_next', queue=queue_json))
 	else:		
 		supported_leagues = ["baseball", "nfl", "nba"]
 		posts_filted = None

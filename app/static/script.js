@@ -52,4 +52,47 @@ $(function() {
 		window.location.href = window.location.href.substring(0, index) + '?league=' + league;
 	});
 
+	// update timestamps everywhere applicable
+	$('.timestamp').each(function() {
+		var ts = $(this).attr("value");
+		var year = ts.substring(0, 4);
+		var month = parseInt(ts.substring(5, 7)) - 1;
+		var date = ts.substring(8, 10);
+		var hours = ts.substring(11, 13);
+		var minutes = ts.substring(14, 16);
+		var seconds = ts.substring(17, 19);
+
+		var date_posted = new Date(Date.UTC(year, month, date, hours, minutes, seconds));
+		var date_now = new Date();
+		var timedelta = date_now - date_posted;
+		var years_ago = parseInt(timedelta / (1000 * 60 * 60 * 24 * 365));
+		var months_ago = parseInt(timedelta / (1000 * 60 * 60 * 24 * 30));
+		var days_ago = parseInt(timedelta / (1000 * 60 * 60 * 24));
+		var hours_ago = parseInt(timedelta / (1000 * 60 * 60));
+		var minutes_ago = parseInt(timedelta / (1000 * 60));
+		
+		// CREATE FRIENDLY STRING TO DESCRIBE WHEN VIDEO WAS POSTED
+		if (years_ago > 1) {
+			$(this).text(years_ago + " years ago");
+		} else if (years_ago == 1) {
+			$(this).text(years_ago + " year ago");
+		} else if (months_ago > 1) {
+			$(this).text(months_ago + " months ago");
+		} else if (months_ago == 1) {
+			$(this).text(months_ago + " month ago");
+		} else if (days_ago > 1) {
+			$(this).text(days_ago + " days ago");
+		} else if (days_ago == 1) {
+			$(this).text(days_ago + " day ago");
+		} else if (hours_ago > 1) {
+			$(this).text(hours_ago + " hours ago");
+		} else if (hours_ago == 1) {
+			$(this).text(hours_ago + " hour ago");
+		} else if (minutes_ago > 1) {
+			$(this).text(minutes_ago + " minutes ago");
+		} else {
+			$(this).text(minutes_ago + " minute ago");
+		}
+	});
+
 });
