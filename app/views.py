@@ -245,13 +245,14 @@ def event_submission():
 				db.session.add(link_away_team)
 				db.session.add(link_home_team)
 
-			db.session.commit()
+			# db.session.commit()
 
 			# redirect to newly created category
 			flash('New event created!')
 
 			# redirect back to video upload if redirect specified
 			next_url = request.args.get('next_url')
+			print(next_url)
 
 			if next_url != None:
 				return redirect(next_url)
