@@ -6,8 +6,25 @@ $(function() {
 	var yyyy = today.getFullYear();
 	var hh = today.getHours();
 
+	// sets default date
 	$(".datetimepicker").datetimepicker({
 		defaultDate: mm + "/" + dd + "/" + yyyy + " " + hh + ":00",
+		icons: {
+			time: 'far fa-clock',
+            date: 'far fa-calendar-alt',
+            up: 'fas fa-arrow-up',
+            down: 'fas fa-arrow-down',
+            previous: 'fas fa-chevron-left',
+            next: 'fas fa-chevron-right',
+            today: 'far fa-calendar-check',
+            clear: 'far fa-trash-alt',
+            close: 'fas fa-times'
+		}
+	});
+
+	// won't set a default date if we're editing an already created event
+	$(".datetimepicker_edit_event").datetimepicker({
+		defaultDate: convert_python_dt_to_js($('.datetimepicker_edit_event').attr("value")),
 		icons: {
 			time: 'far fa-clock',
             date: 'far fa-calendar-alt',
@@ -52,9 +69,9 @@ $(function() {
 	// 	window.location.href = window.location.href.substring(0, index) + '?league=' + league;
 	// });
 
-	// update timestamps everywhere applicable
-	$('.timestamp').each(function() {
-		var ts = $(this).attr("value");
+
+	// converts python datetime to js datetime object
+	function convert_python_dt_to_js(ts) {
 		var year = ts.substring(0, 4);
 		var month = parseInt(ts.substring(5, 7)) - 1;
 		var date = ts.substring(8, 10);
@@ -62,7 +79,12 @@ $(function() {
 		var minutes = ts.substring(14, 16);
 		var seconds = ts.substring(17, 19);
 
-		var date_posted = new Date(Date.UTC(year, month, date, hours, minutes, seconds));
+		return new Date(Date.UTC(year, month, date, hours, minutes, seconds));
+	}
+
+	// update timestamps everywhere applicable
+	$('.timestamp').each(function() {
+		var date_posted = convert_python_dt_to_js($(this).attr("value"));
 		var date_now = new Date();
 		var timedelta = date_now - date_posted;
 		var years_ago = parseInt(timedelta / (1000 * 60 * 60 * 24 * 365));
@@ -94,5 +116,6 @@ $(function() {
 			$(this).text(minutes_ago + " minute ago");
 		}
 	});
+
 
 });

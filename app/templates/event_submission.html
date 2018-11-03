@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Event Submission</h1>
+<h1>{{ title }}</h1>
+
+{% if edit_event %}
+<h4><a href="{{ url_for('event_page', page_title=event.title) }}">{{ event.title }}</a></h4>
+{% endif %}
+
 <form action="" method="post" id="form_event_submission">
     {{ form.hidden_tag() }}
     <div class="form-group" hidden>
@@ -59,13 +64,19 @@
         <!-- start time -->
         <div class="col-md-6 form-group">
             {{ form.start_time.label }} - <strong><span id="datetimepicker_tz_start"></span></strong>
-            <div class="input-group mb-3 date datetimepicker" id="datetimepicker_event_start" data-target-input="nearest">
+
+            <!-- use different classes to prevent datepicker from settting a default value -->
+            {% if edit_event %}
+                <div class="input-group mb-3 date datetimepicker_edit_event" id="datetimepicker_event_start" data-target-input="nearest" value="{{ start_time_val }}">
+            {% else %}
+                <div class="input-group mb-3 date datetimepicker" id="datetimepicker_event_start" data-target-input="nearest">
+            {% endif %}
                 {{ form.start_time(type='text', class_='form-control datetimepicker-input', data_target='datetimepicker_event_start') }}
 
-                <div class="input-group-append" data-target="#datetimepicker_event_start" data-toggle="datetimepicker">
-                    <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
+                    <div class="input-group-append" data-target="#datetimepicker_event_start" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
+                    </div>
                 </div>
-            </div>
             <div class="invalid-feedback">
                 {% for error in form.start_time.errors %}
                     <span>{{ error }}</span>

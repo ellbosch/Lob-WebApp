@@ -8,9 +8,9 @@ from flask_security.decorators import roles_required, roles_accepted
 from datetime import datetime, timedelta
 from sqlalchemy import desc
 from collections import defaultdict
+from werkzeug.datastructures import ImmutableMultiDict
 import pytz
 import json
-
 
 application.jinja_env.globals['CHANNELS'] = Channel.query.join(Category, Channel.id_cat==Category.id).add_columns(Category.title).all()
 
@@ -209,20 +209,22 @@ def event_submission():
 			event_type = form.event_type.data
 			event_title = form.event_title.data
 			start_time = datetime.strptime("%s %s" % (form.start_time.data, form.tz.data), "%m/%d/%Y %I:%M %p %z")
+			print(start_time.strftime("%z"))
 
-			# create default type event
+			# create default type event WE'RE CURRENTLY SKIPPING THIS
 			if event_type == "default":
-				end_time = datetime.strptime("%s %s" % (form.end_time.data, form.tz.data), "%m/%d/%Y %I:%M %p %z")
+				pass
+				# end_time = datetime.strptime("%s %s" % (form.end_time.data, form.tz.data), "%m/%d/%Y %I:%M %p %z")
 
-				event = Event(title=event_title, start_time=start_time, end_time=end_time,
-					event_type=event_type, created_at=datetime.utcnow(), created_by=current_user.id)
-				db.session.add(event)
+				# event = Event(title=event_title, start_time=start_time, end_time=end_time,
+				# 	event_type=event_type, created_at=datetime.utcnow(), created_by=current_user.id)
+				# db.session.add(event)
 				
-				# iterate through each selected parent category and add a link to the db
-				for cat in form.parent_category.data:
-					categorylink = LinkToCategory(title_from=event.title, namespace_from="event",
-						title_to=cat.title, created_at=datetime.utcnow(), created_by=current_user.id)
-					db.session.add(categorylink)
+				# # iterate through each selected parent category and add a link to the db
+				# for cat in form.parent_category.data:
+				# 	categorylink = LinkToCategory(title_from=event.title, namespace_from="event",
+				# 		title_to=cat.title, created_at=datetime.utcnow(), created_by=current_user.id)
+				# 	db.session.add(categorylink)
 			
 			# create sports game type event
 			else:
@@ -252,8 +254,6 @@ def event_submission():
 
 			# redirect back to video upload if redirect specified
 			next_url = request.args.get('next_url')
-			print(next_url)
-
 			if next_url != None:
 				return redirect(next_url)
 			else:
@@ -262,9 +262,10 @@ def event_submission():
 			print(form.errors)
 	else:
 		# adds params to form, if provided
+		print(request.args)
 		form = EventSubmissionForm(request.args)
 
-	return render_template('event_submission.html', title='Submit New Category', form=form)
+	return render_template('event_submission.html', title='Event Submission', form=form)
 
 # submit video
 @application.route('/video_submission', methods=['GET', 'POST'])
@@ -340,6 +341,66 @@ def video_submission_next():
 
 	return redirect(url_for('video_submission', video_url=video_url, video_title=video_title,
 		video_date=video_date, queue=queue_json))
+
+
+''' ************************************
+	PAGE MODIFICATION
+	************************************'''
+# modify event page
+"""
+requirements
+1. find all links to category and edit the title_from (only possible links are the teams)
+"""
+@application.route('/event/<page_title>/edit', methods=['GET', 'POST'])
+@roles_accepted('admin', 'moderator')
+def edit_event_page(page_title):
+	# get event from title
+	event_title = page_title.replace('_', ' ')
+	event = Event.query.filter_by(title=event_title).first()
+
+	if event != None:
+
+		"""
+		if get:
+			1. show normal event form, with title of current event and input changed to "edit"
+		if post:
+			1. delete all links that are present
+			2. add all links that aren't present
+			3. change title if different
+			4. change start time if different
+
+		"""
+		if request.method == 'POST':
+			print('in here')
+			pass
+		else:
+			# find home and away teams from event title
+			teams = get_teams_for_event(event.title)
+
+			start_time_utc = event.start_time.astimezone(pytz.utc)
+
+			# args = urllib.parse.urlencode({
+			args = ImmutableMultiDict([
+				('event_type', 'sports_game'),
+				('league', str(find_league_for_event(event.title).id)),
+				('event_title', event.title),
+				('away_team', str(teams[0].id)),
+				('home_team', str(teams[1].id))
+				# ('start_time', str(start_time_utc))
+			])
+
+			form = EventSubmissionForm(args)
+			return render_template('event_submission.html', title='Edit Event', form=form,
+				event=event, edit_event=True, start_time_val=str(start_time_utc))
+		# return redirect(url_for('event_submission', edit=True, event_type=event_type, league=league,
+		# 	away_team=away_team, home_team=home_team, start_time=start_time, parent_category=parent_category))
+	else:
+		flash('Event not found!')
+		return redirect(url_for('home_page'))
+	
+	# return same template from event page submission, with new parameter for editing a current event
+
+
 
 ''' ************************************
 	PAGE VIEWS
@@ -615,3 +676,23 @@ def get_teams_for_league(league):
 		filter_by(title="%s Teams" % league).order_by(LinkToCategory.title_from).all()
 
 	return [Category.query.filter_by(title=link.title_from).first() for link in links]
+
+# finds league given a team
+def find_league_for_event(event_title):
+	# get all leagues
+	leagues = Category.query.filter_by(category_type="sports_league").all()
+	event_teams = [t.title for t in get_teams_for_event(event_title)]
+
+	# search for team match within all leagues
+	for league in leagues:
+		teams = [link.title_from for link in LinkToCategory.query.filter_by(title_to="%s Teams" % league.title)]
+		if event_teams[0] in teams:
+			return league
+
+	return None
+
+# finds teams in event title
+def get_teams_for_event(event_title):
+	s1 = event_title.split(':')[0]
+	s2 = s1.split(' at ')
+	return [Category.query.filter_by(title=team).all()[0] for team in s2]
