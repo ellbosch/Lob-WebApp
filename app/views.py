@@ -209,7 +209,6 @@ def event_submission():
 			event_type = form.event_type.data
 			event_title = form.event_title.data
 			start_time = datetime.strptime("%s %s" % (form.start_time.data, form.tz.data), "%m/%d/%Y %I:%M %p %z")
-			print(start_time.strftime("%z"))
 
 			# create default type event WE'RE CURRENTLY SKIPPING THIS
 			if event_type == "default":
@@ -371,8 +370,40 @@ def edit_event_page(page_title):
 
 		"""
 		if request.method == 'POST':
-			print('in here')
-			pass
+			form = EventSubmissionForm()
+			if form.validate_on_submit():
+				#  modify changed teams
+				teams_new = set([form.away_team.data, form.home_team.data])
+				teams_old = set(get_teams_for_event(event.title))
+
+				teams_to_add = teams_new.difference(teams_old)
+				teams_to_remove = teams_old.difference(teams_new)
+
+				# remove links to event for teams no longer in event
+				for t in teams_to_remove:
+					link = LinkToCategory.query.filter_by(title_from=event.title, title_to=t.title, namespace_from='event').first()
+					db.session.delete(link)
+
+				# add links to event for new team additions
+				for t in teams_to_add:
+					link = LinkToCategory(title_from=event.title, title_to=t.title, namespace_from='event',
+						created_at=datetime.utcnow(), created_by=current_user.id)
+					db.session.add(link)
+
+				away_team = form.away_team.data.title
+				home_team = form.home_team.data.title
+				start_time = datetime.strptime("%s %s" % (form.start_time.data, form.tz.data), "%m/%d/%Y %I:%M %p %z")
+				event_title = "%s at %s: %s" % (away_team, home_team, start_time.strftime("%b %-d, %Y"))
+
+				# change start time or title, if necessary
+				if start_time != event.start_time or event_title != event.title:
+					event_new = Event(id=event.id, title=event_title, start_time=start_time)
+					db.session.merge(event_new)
+
+				db.session.commit()
+				flash('Event successfully edited.')
+				return redirect(url_for('event_page', page_title=event.title))
+
 		else:
 			# find home and away teams from event title
 			teams = get_teams_for_event(event.title)

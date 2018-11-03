@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% if 'admin' in current_user.roles %}
+    <a href="{{ url_for('edit_event_page', page_title=title) }}">Edit Event</a>
+{% endif %}
 <h1>{{ title }}</h1>
 
 {% if not page_exists %}
