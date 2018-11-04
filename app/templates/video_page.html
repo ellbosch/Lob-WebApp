@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- display error if no video found for id -->
+{% if video == None %}
+    <div class="alert alert-warning" role="alert">
+        No video found!
+    </div>
+{% else %}
+    <video style="max-width: 100%;" loop controls playsinline preload="auto"><source src="{{ video.url }}" type="video/mp4"></video>
+    <h4 class="card-title">{{ video.text }}</h4>
+{% endif %}
+{% endblock %}

@@ -346,10 +346,6 @@ def video_submission_next():
 	PAGE MODIFICATION
 	************************************'''
 # modify event page
-"""
-requirements
-1. find all links to category and edit the title_from (only possible links are the teams)
-"""
 @application.route('/event/<page_title>/edit', methods=['GET', 'POST'])
 @roles_accepted('admin', 'moderator')
 def edit_event_page(page_title):
@@ -358,17 +354,6 @@ def edit_event_page(page_title):
 	event = Event.query.filter_by(title=event_title).first()
 
 	if event != None:
-
-		"""
-		if get:
-			1. show normal event form, with title of current event and input changed to "edit"
-		if post:
-			1. delete all links that are present
-			2. add all links that aren't present
-			3. change title if different
-			4. change start time if different
-
-		"""
 		if request.method == 'POST':
 			form = EventSubmissionForm()
 			if form.validate_on_submit():
@@ -423,8 +408,6 @@ def edit_event_page(page_title):
 			form = EventSubmissionForm(args)
 			return render_template('event_submission.html', title='Edit Event', form=form,
 				event=event, edit_event=True, start_time_val=str(start_time_utc))
-		# return redirect(url_for('event_submission', edit=True, event_type=event_type, league=league,
-		# 	away_team=away_team, home_team=home_team, start_time=start_time, parent_category=parent_category))
 	else:
 		flash('Event not found!')
 		return redirect(url_for('home_page'))
@@ -578,6 +561,17 @@ def event_page(page_title):
 	return render_template('event_page.html', title=title, page_exists=page_exists,
 		parent_categories=parent_categories, videos=videos)
 
+# video page
+@application.route('/video/<video_id>/', methods=['GET'])
+@roles_accepted('admin', 'moderator', 'beta_user')
+def video_page(video_id):
+	video = Video.query.\
+				join(VideoTextRevision, Video.latest_title_id==VideoTextRevision.text_id).\
+				join(Text, VideoTextRevision.text_id==Text.id).\
+				filter_by(id=video_id).add_columns(Video.url, Text.text).first()
+	events = get_events_for_video(video_id)
+	return render_template('video_page.html', video=video, events=events)
+
 
 ''' ************************************
 	VIEW SCRAPED VIDEOS (SSSSHHHHHH)
@@ -687,7 +681,7 @@ def get_videos_for_event(title):
 		join(VideoTextRevision, Video.latest_title_id==VideoTextRevision.text_id).\
 		join(Text, VideoTextRevision.text_id==Text.id).\
 		join(Event, VideoLinkToEvent.event_to==Event.id).filter_by(title=title).\
-		add_columns(Video.url, Video.posted_by, Video.uploaded_at, Text.text, Event.title).all()
+		add_columns(Video.url, Video.id, Video.posted_by, Video.uploaded_at, Text.text, Event.title).all()
 
 # gets videos for all nested videos in category
 def get_nested_videos_for_cat(cat):
@@ -727,3 +721,9 @@ def get_teams_for_event(event_title):
 	s1 = event_title.split(':')[0]
 	s2 = s1.split(' at ')
 	return [Category.query.filter_by(title=team).all()[0] for team in s2]
+
+# gets all linked events for a video
+def get_events_for_video(video_id):
+	return VideoLinkToEvent.query.filter_by(video_from=video_id).\
+		join(Event, VideoLinkToEvent.event_to==Event.id).all()
+

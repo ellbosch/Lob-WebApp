@@ -33,7 +33,7 @@
         <div class="card card_video border-light">
             <video class="card-img-top" loop controls playsinline preload="auto"><source src="{{ link.url }}" type="video/mp4"></video>
             <div class="card-body">
-                <h5 class="card-title">{{ link.text }}</h5>
+                <h5 class="card-title"><a href="{{ url_for('video_page', video_id=link.id) }}">{{ link.text }}</a></h5>
                 <!-- <small class="text-muted">Last updated 3 mins ago</small> -->
             </div>
         </div>
