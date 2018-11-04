@@ -685,13 +685,33 @@ def get_videos_for_event(title):
 
 # gets videos for all nested videos in category
 def get_nested_videos_for_cat(cat):
-	videos = []
+	videos_tagged = []
+	matching_subreddit = None
 	events = get_nested_events_for_cat(cat)
 
+	# get all videos tagged in our system
 	for event in events:
-		videos.extend(get_videos_for_event(event.title))
+		videos_tagged.extend(get_videos_for_event(event.title))
+	videos_all = videos_tagged
 
-	videos_sorted = sorted(videos, key=lambda v: v.uploaded_at, reverse=True)
+	# find subreddit to use for get untagged videos from reddit
+	if cat.title == "NBA" or cat.title == "NFL":
+		matching_subreddit = cat.title.lower()
+	elif cat.title == "MLB":
+		matching_subreddit = "baseball"
+
+	# get untagged reddit videos, if category is applicable
+	if matching_subreddit != None:
+		videos_reddit = db.session.\
+			query(Videopost.title.label('text'), Videopost.mp4_url.label('url'), Videopost.date_posted.label('uploaded_at')).\
+			filter_by(league=matching_subreddit).all()
+		urls_tagged = [v.url for v in videos_tagged]
+
+		for v in videos_reddit:
+			if v.url not in urls_tagged:
+				videos_all.append(v)
+
+	videos_sorted = sorted(videos_all, key=lambda v: v.uploaded_at, reverse=True)
 	return videos_sorted
 
 # get teams for league

@@ -186,6 +186,7 @@ class Videopost(db.Model):
     height = db.Column(db.Integer, nullable=False)
     width = db.Column(db.Integer, nullable=False)
     in_train_set = db.Column(db.Boolean, nullable=False)
+    is_reddit = True
 
     def __init__(self, id=None, title=None, source=None, league=None, date_posted=None, author=None,
                 reddit_score=None, reddit_comments_url=None, url=None, in_train_set=0):
