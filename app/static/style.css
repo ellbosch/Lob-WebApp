@@ -44,3 +44,13 @@ body {
 	width: 100%;
 	max-width: 600px;
 }
+
+/* loading spinner */
+#load-more-posts {
+    height: 100px;
+}
+
+#load-more-posts #loading-spinner-posts {
+    top: auto;
+    margin-top: 40px;
+}

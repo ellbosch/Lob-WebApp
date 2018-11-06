@@ -14,6 +14,48 @@ import json
 
 application.jinja_env.globals['CHANNELS'] = Channel.query.join(Category, Channel.id_cat==Category.id).add_columns(Category.title).all()
 
+# global array for all posts
+VIDEOS_BUFFER = []
+
+# class that holds buffer of reddit posts
+class Videos():
+	def __init__(self, category=None):
+		self.videos = get_nested_videos_for_cat(category=category)
+		self.index = 0
+
+	def __iter__(self):
+		return self
+
+	def next(self):
+		try:
+			video = self.videos[self.index]
+		except IndexError:
+			raise StopIteration
+		self.index += 1
+		return video
+
+
+def get_next_videos():
+	videos = []
+	for i in range(10):
+		videos.append(VIDEOS_BUFFER.next())
+	return videos
+
+@application.route('/load-more/', methods=['GET'])
+# @roles_accepted('admin', 'moderator', 'beta_user')
+def load_more_videos():
+    stop_iteration_hit = False
+    posts = []
+
+    try:
+        posts = get_next_videos()
+    except StopIteration:
+        stop_iteration_hit = True
+        
+    return jsonify(result = {"posts": [{ "url": p.url, "text": p.text } for p in posts],
+                             "error": stop_iteration_hit})
+
+
 @application.route('/')
 def home_page():
 	videos = []
@@ -21,14 +63,21 @@ def home_page():
 	channels = Channel.query.join(Category, Category.id==Channel.id_cat).\
 		add_columns(Category.title).all()
 
-	print(channels)
-
 	for channel in channels:
 		# get all nested events
 		events.extend([event.title for event in get_nested_events_for_cat(channel, days_back=2)])
 
-		# get all videos, sorted by upload time
-		videos.extend(get_nested_videos_for_cat(channel))
+	# get all videos, sorted by upload time
+	page = request.args.get('page')
+	if page != None:
+		page = int(page)
+	
+	# get videos from global buffer
+	global VIDEOS_BUFFER
+	VIDEOS_BUFFER = Videos()
+	videos = get_next_videos()
+
+	# videos = get_nested_videos_for_cat(page=page)
 
 	return render_template('home_page.html', events=events, videos=videos)
 
@@ -684,34 +733,51 @@ def get_videos_for_event(title):
 		add_columns(Video.url, Video.id, Video.posted_by, Video.uploaded_at, Text.text, Event.title).all()
 
 # gets videos for all nested videos in category
-def get_nested_videos_for_cat(cat):
-	videos_tagged = []
+def get_nested_videos_for_cat(category=None, page=None):
+	# page size for pagination
+	page_size = 10
+	channels = [category]
+	videos_all = []
 	matching_subreddit = None
-	events = get_nested_events_for_cat(cat)
+	
+	# set default pagination if user inputs None
+	if page == None:
+		page = 1
+	
+	# if no category is specified, search all channels (home page functionality)
+	if category == None:
+		channels = Channel.query.join(Category, Category.id==Channel.id_cat).\
+							add_columns(Category.title).all()
+	
+	# get all videos for each channel we're parsing
+	for channel in channels:
+		videos_tagged = []
+		events = get_nested_events_for_cat(channel)
 
-	# get all videos tagged in our system
-	for event in events:
-		videos_tagged.extend(get_videos_for_event(event.title))
-	videos_all = videos_tagged
+		# get all videos tagged in our system
+		for event in events:
+			videos_tagged.extend(get_videos_for_event(event.title))
+		videos_all.extend(videos_tagged)
 
-	# find subreddit to use for get untagged videos from reddit
-	if cat.title == "NBA" or cat.title == "NFL":
-		matching_subreddit = cat.title.lower()
-	elif cat.title == "MLB":
-		matching_subreddit = "baseball"
+		# find subreddit to use for get untagged videos from reddit
+		if channel.title == "NBA" or channel.title == "NFL":
+			matching_subreddit = channel.title.lower()
+		elif channel.title == "MLB":
+			matching_subreddit = "baseball"
 
-	# get untagged reddit videos, if category is applicable
-	if matching_subreddit != None:
-		videos_reddit = db.session.\
-			query(Videopost.title.label('text'), Videopost.mp4_url.label('url'), Videopost.date_posted.label('uploaded_at')).\
-			filter_by(league=matching_subreddit).all()
-		urls_tagged = [v.url for v in videos_tagged]
+		# get untagged reddit videos, if category is applicable
+		if matching_subreddit != None:
+			videos_reddit = db.session.\
+				query(Videopost.title.label('text'), Videopost.mp4_url.label('url'),
+					Videopost.date_posted.label('uploaded_at')).\
+				filter_by(league=matching_subreddit).all()
+			urls_tagged = [v.url for v in videos_tagged]
 
-		for v in videos_reddit:
-			if v.url not in urls_tagged:
-				videos_all.append(v)
+			for v in videos_reddit:
+				if v.url not in urls_tagged:
+					videos_all.append(v)
 
-	videos_sorted = sorted(videos_all, key=lambda v: v.uploaded_at, reverse=True)
+	videos_sorted = sorted(videos_all, key=lambda v: v.uploaded_at, reverse=True)#[page_size * (page - 1):page_size * page]
 	return videos_sorted
 
 # get teams for league

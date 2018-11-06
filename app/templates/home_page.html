@@ -10,9 +10,9 @@
 	</div>
 
 {% elif current_user.roles|length == 0 %}
-<div class="alert alert-info" role="alert">
-	<strong>Your sign-up for private beta is waiting approval.</strong>
-</div>
+	<div class="alert alert-info" role="alert">
+		<strong>Your sign-up for private beta is waiting approval.</strong>
+	</div>
 {% else %}
 <!-- show events -->
 	{% if events|length > 0 %}
@@ -28,15 +28,22 @@
 	{% if videos|length > 0 %}
 		<h2>Videos</h2>
 		<div class="row">
-		{% for link in videos %}
-			<div class="card card_video border-light">
-				<video class="card-img-top" loop controls playsinline preload="auto"><source src="{{ link.url }}" type="video/mp4"></video>
-				<div class="card-body">
-					<h5 class="card-title">{{ link.text }}</h5>
-					<small class="text-muted"><a href="{{ url_for('event_page', page_title=link.title) }}">{{ link.title }}</a></small>
+			{% for link in videos %}
+				<div class="card card_video border-light">
+					<video class="card-img-top" loop controls playsinline preload="auto"><source src="{{ link.url }}" type="video/mp4"></video>
+					<div class="card-body">
+						<h5 class="card-title">{{ link.text }}</h5>
+						<!-- <small class="text-muted"><a href="{{ url_for('event_page', page_title=link.text) }}">{{ link.text }}</a></small> -->
+					</div>
 				</div>
+			{% endfor %}
+		</div>
+		<div id="load-more-posts">
+			<div class="loading-spinner" id="loading-spinner-posts">
+				<div class="dot dotOne"></div>
+				<div class="dot dotTwo"></div>
+				<div class="dot dotThree"></div>
 			</div>
-		{% endfor %}
 		</div>
 	{% endif %}
 
