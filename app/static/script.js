@@ -83,11 +83,10 @@ $(function() {
 		}
 	}
 
-	// update timestamps everywhere applicable
-	$('.timestamp').each(function() {
-		var date_posted = convert_python_dt_to_js($(this).attr("value"));
+	// converts js timestamp to string for time ago
+	function get_time_back(date) {
 		var date_now = new Date();
-		var timedelta = date_now - date_posted;
+		var timedelta = date_now - date;
 		var years_ago = parseInt(timedelta / (1000 * 60 * 60 * 24 * 365));
 		var months_ago = parseInt(timedelta / (1000 * 60 * 60 * 24 * 30));
 		var days_ago = parseInt(timedelta / (1000 * 60 * 60 * 24));
@@ -96,26 +95,32 @@ $(function() {
 		
 		// CREATE FRIENDLY STRING TO DESCRIBE WHEN VIDEO WAS POSTED
 		if (years_ago > 1) {
-			$(this).text(years_ago + " years ago");
+			return years_ago + " years ago";
 		} else if (years_ago == 1) {
-			$(this).text(years_ago + " year ago");
+			return years_ago + " year ago";
 		} else if (months_ago > 1) {
-			$(this).text(months_ago + " months ago");
+			return months_ago + " months ago";
 		} else if (months_ago == 1) {
-			$(this).text(months_ago + " month ago");
+			return months_ago + " month ago";
 		} else if (days_ago > 1) {
-			$(this).text(days_ago + " days ago");
+			return days_ago + " days ago";
 		} else if (days_ago == 1) {
-			$(this).text(days_ago + " day ago");
+			return days_ago + " day ago";
 		} else if (hours_ago > 1) {
-			$(this).text(hours_ago + " hours ago");
+			return hours_ago + " hours ago";
 		} else if (hours_ago == 1) {
-			$(this).text(hours_ago + " hour ago");
+			return hours_ago + " hour ago";
 		} else if (minutes_ago > 1) {
-			$(this).text(minutes_ago + " minutes ago");
+			return minutes_ago + " minutes ago";
 		} else {
-			$(this).text(minutes_ago + " minute ago");
+			return minutes_ago + " minute ago";
 		}
+	}
+
+	// update timestamps everywhere applicable
+	$('.timestamp').each(function() {
+		var date_posted = convert_python_dt_to_js($(this).attr("value"));
+		$(this).text(get_time_back(date_posted));
 	});
 
 	// load more posts when user scrolls
@@ -131,8 +136,6 @@ $(function() {
 			dataType: "json",
 			crossDomain: true
 		}).done(function(data) {
-			console.log(data);
-
 			// store scrollTop value
 			pos = $("div_content_block").scrollTop();
 
@@ -141,24 +144,21 @@ $(function() {
 			var posts = data.result['posts'];
 			for (var i = 0; i < posts.length; i++) {
 				post = posts[i]
-				console.log(post);
+				var date_posted = new Date(post.uploaded_at);
 
-				// post_html = "<li class='post' data-url='" + post.url + "'><div class='post_header'>" + post.reddit_title + "</div>";
+				html = html + 
+					`<div class="card card_video border-light">
+						<video class="card-img-top" loop controls playsinline preload="auto"><source src="` + post.url + `" type="video/mp4"></video>
+						<div class="card-body">
+							<h5 class="card-title">` + post.text + `</h5>
+							<small class="text-muted timestamp" value="` + post.uploaded_at + `">` + get_time_back(date_posted) + `&nbsp;&nbsp;&nbsp;</small>
+						</div>
+					</div>`;
 
-				// if (post.subreddit == 'worldnews') {
-				// 	post_html = post_html + "<div class='post_subreddit worldnews'><a href='https://www.reddit.com/r/worldnews'><i class='fa fa-globe'></i><span>r/worldnews</span></a></div></li>";
-				// } else if (post.subreddit =='news') {
-				// 	post_html = post_html + "<div class='post_subreddit news'><a href='https://www.reddit.com/r/news'><i class='fa fa-newspaper-o'></i><span>r/news</span></a></div></li>";
-				// } else if (post.subreddit == 'science') {
-				// 	post_html = post_html + "<div class='post_subreddit science'><a href='https://www.reddit.com/r/science'><i class='fa fa-flask'></i><span>r/science</span></a></div></li>";
-				// } else if (post.subreddit == 'tech') {
-				// 	post_html = post_html + "<div class='post_subreddit tech'><a href='https://www.reddit.com/r/tech'><i class='fa fa-rocket'></i><span>r/tech</span></a></div></li>";
-				// }
-				// html = html + post_html;
-				// $("#posts_list_div .scroll-container").scrollTop(pos);
+				$("div_content_block").scrollTop(pos);
 			}
 			Waypoint.destroyAll();			// destroys waypoint, but we'll recreate it
-			// $("#all_posts").append(html);	// updates DOM
+			$(".container_videos").append(html);	// updates DOM
 
 			// only recreate waypoint if there are more posts to load
 			if (!data.result['error']) {
@@ -171,14 +171,14 @@ $(function() {
 		});
 	}
 
-		// create waypoint for loading more posts
+	// create waypoint for loading more posts
 	function create_waypoint() {
 		waypoints = $("#load-more-posts").waypoint({
 			handler: function() {
 				append_posts();
-			}//,
-			// offset: 'bottom-in-view',
-			// context: $("div_content_block")
+			},
+			offset: 'bottom-in-view'//,
+			// context: $("#div_content_block")
 		})
 	}
 
