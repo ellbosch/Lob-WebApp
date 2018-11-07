@@ -27,17 +27,17 @@
 	<!-- show videos -->
 	{% if videos|length > 0 %}
 		<h2>Videos</h2>
-		<div class="row">
 			{% for link in videos %}
+		<!-- <div class="row"> -->
 				<div class="card card_video border-light">
 					<video class="card-img-top" loop controls playsinline preload="auto"><source src="{{ link.url }}" type="video/mp4"></video>
 					<div class="card-body">
 						<h5 class="card-title">{{ link.text }}</h5>
-						<!-- <small class="text-muted"><a href="{{ url_for('event_page', page_title=link.text) }}">{{ link.text }}</a></small> -->
+						<small class="text-muted timestamp" value="{{ link.uploaded_at }}">{{ link.uploaded_at.strftime("%b %-d, %Y %-I:%M %p") }}&nbsp;&nbsp;&nbsp;</small>
 					</div>
 				</div>
+		<!-- </div> -->
 			{% endfor %}
-		</div>
 		<div id="load-more-posts">
 			<div class="loading-spinner" id="loading-spinner-posts">
 				<div class="dot dotOne"></div>

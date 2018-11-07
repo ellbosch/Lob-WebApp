@@ -186,27 +186,27 @@ class Videopost(db.Model):
     height = db.Column(db.Integer, nullable=False)
     width = db.Column(db.Integer, nullable=False)
     in_train_set = db.Column(db.Boolean, nullable=False)
-    is_reddit = True
 
-    def __init__(self, id=None, title=None, source=None, league=None, date_posted=None, author=None,
-                reddit_score=None, reddit_comments_url=None, url=None, in_train_set=0):
-        self.id = id
-        self.title = title
-        self.source = source
-        self.league = league
-        self.date_posted = date_posted
-        self.author = author
-        self.reddit_score = reddit_score
-        self.reddit_comments_url = reddit_comments_url
-        self.url = url
-        self.in_train_set = in_train_set
+    
+    # def __init__(self, id=None, title=None, source=None, league=None, date_posted=None, author=None,
+    #             reddit_score=None, reddit_comments_url=None, url=None, in_train_set=0):
+    #     self.id = id
+    #     self.title = title
+    #     self.source = source
+    #     self.league = league
+    #     self.date_posted = date_posted
+    #     self.author = author
+    #     self.reddit_score = reddit_score
+    #     self.reddit_comments_url = reddit_comments_url
+    #     self.url = url
+    #     self.in_train_set = in_train_set
 
-    def set_dimension(self, height=height, width=width):
-        self.height = height
-        self.width = width
+    # def set_dimension(self, height=height, width=width):
+    #     self.height = height
+    #     self.width = width
 
-    def set_mp4_url(self, mp4_url):
-        self.mp4_url = mp4_url
+    # def set_mp4_url(self, mp4_url):
+    #     self.mp4_url = mp4_url
 
 
     # @hybrid_property
@@ -214,19 +214,19 @@ class Videopost(db.Model):
     #     return self.date_posted + timedelta(hours=1)
 
     # serialize for json consumption
-    @property
-    def serialize(self):
-        return {
-            'id': self.id,
-            'title': self.title,
-            'url': self.url,
-            'mp4_url': self.mp4_url,
-            'league': self.league,
-            'date_posted': self.date_posted,
-            'author': self.author,
-            'reddit_comments_url': self.reddit_comments_url,
-            'reddit_score': self.reddit_score
-        }
+    # @property
+    # def serialize(self):
+    #     return {
+    #         'id': self.id,
+    #         'title': self.title,
+    #         'url': self.url,
+    #         'mp4_url': self.mp4_url,
+    #         'league': self.league,
+    #         'date_posted': self.date_posted,
+    #         'author': self.author,
+    #         'reddit_comments_url': self.reddit_comments_url,
+    #         'reddit_score': self.reddit_score
+    #     }
 
 
 

@@ -52,8 +52,13 @@ def load_more_videos():
     except StopIteration:
         stop_iteration_hit = True
         
-    return jsonify(result = {"posts": [{ "url": p.url, "text": p.text } for p in posts],
+    return jsonify(result = {"posts": [{ "url": p.url,
+										 "text": p.text,
+										 "uploaded_at": p.uploaded_at,
+										 "is_reddit": True if 'reddit' in p.url else False } 
+									for p in posts],
                              "error": stop_iteration_hit})
+
 
 
 @application.route('/')
@@ -730,7 +735,8 @@ def get_videos_for_event(title):
 		join(VideoTextRevision, Video.latest_title_id==VideoTextRevision.text_id).\
 		join(Text, VideoTextRevision.text_id==Text.id).\
 		join(Event, VideoLinkToEvent.event_to==Event.id).filter_by(title=title).\
-		add_columns(Video.url, Video.id, Video.posted_by, Video.uploaded_at, Text.text, Event.title).all()
+		add_columns(Video.url, Video.id, Video.posted_by, Video.uploaded_at,
+			Text.text, Event.title).all()
 
 # gets videos for all nested videos in category
 def get_nested_videos_for_cat(category=None, page=None):
