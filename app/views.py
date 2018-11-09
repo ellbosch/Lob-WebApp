@@ -54,8 +54,8 @@ def load_more_videos():
         
     return jsonify(result = {"posts": [{ "url": p.url,
 										 "text": p.text,
-										 "uploaded_at": p.uploaded_at,
-										 "is_reddit": True if 'reddit' in p.url else False } 
+										 "uploaded_at": p.uploaded_at}
+										 # "is_reddit": True if 'reddit' in p.url else False } 
 									for p in posts],
                              "error": stop_iteration_hit})
 
@@ -64,27 +64,20 @@ def load_more_videos():
 @application.route('/')
 def home_page():
 	videos = []
-	events = []
-	channels = Channel.query.join(Category, Category.id==Channel.id_cat).\
-		add_columns(Category.title).all()
+	# events = []
+	# channels = Channel.query.join(Category, Category.id==Channel.id_cat).\
+	# 	add_columns(Category.title).all()
 
-	for channel in channels:
-		# get all nested events
-		events.extend([event.title for event in get_nested_events_for_cat(channel, days_back=2)])
-
-	# get all videos, sorted by upload time
-	page = request.args.get('page')
-	if page != None:
-		page = int(page)
+	# for channel in channels:
+	# 	# get all nested events
+	# 	events.extend([event.title for event in get_nested_events_for_cat(channel, days_back=2)])
 	
 	# get videos from global buffer
 	global VIDEOS_BUFFER
 	VIDEOS_BUFFER = Videos()
 	videos = get_next_videos()
 
-	# videos = get_nested_videos_for_cat(page=page)
-
-	return render_template('home_page.html', events=events, videos=videos)
+	return render_template('home_page.html', videos=videos)
 
 ''' ************************************
 	LOGIN / REGISTRATION
@@ -315,7 +308,6 @@ def event_submission():
 			print(form.errors)
 	else:
 		# adds params to form, if provided
-		print(request.args)
 		form = EventSubmissionForm(request.args)
 
 	return render_template('event_submission.html', title='Event Submission', form=form)
@@ -386,8 +378,6 @@ def video_submission_next():
 	video_url = video_data.mp4_url
 	video_title = video_data.title
 	video_date = video_data.date_posted
-	print(video_date)
-
 
 	# convert queue back to json for call
 	queue_json = json.dumps(queue)
@@ -619,7 +609,15 @@ def event_page(page_title):
 @application.route('/video/<video_id>/', methods=['GET'])
 @roles_accepted('admin', 'moderator', 'beta_user')
 def video_page(video_id):
-	video = Video.query.\
+	video = None
+	is_reddit = True if 'reddit' in video_id else False
+
+	if is_reddit:
+		video = db.session.\
+				query(Videopost.title.label('text'), Videopost.mp4_url.label('url'),
+					Videopost.date_posted.label('uploaded_at')).filter_by(id=video_id).first()
+	else:
+		video = Video.query.\
 				join(VideoTextRevision, Video.latest_title_id==VideoTextRevision.text_id).\
 				join(Text, VideoTextRevision.text_id==Text.id).\
 				filter_by(id=video_id).add_columns(Video.url, Text.text).first()
@@ -631,7 +629,7 @@ def video_page(video_id):
 	VIEW SCRAPED VIDEOS (SSSSHHHHHH)
 	************************************'''
 @application.route('/reddit_videos/<league>', methods=['GET', 'POST'])
-@application.route('/reddit_videos', methods=['GET', 'POST'])
+@application.route('/reddit_videos', methods=['GET', 'POSaT'])
 @login_required
 @roles_accepted('admin', 'scraper')
 def reddit_videos(league='mlb'):
@@ -775,7 +773,7 @@ def get_nested_videos_for_cat(category=None, page=None):
 		if matching_subreddit != None:
 			videos_reddit = db.session.\
 				query(Videopost.title.label('text'), Videopost.mp4_url.label('url'),
-					Videopost.date_posted.label('uploaded_at')).\
+					Videopost.date_posted.label('uploaded_at'), Videopost.id).\
 				filter_by(league=matching_subreddit).all()
 			urls_tagged = [v.url for v in videos_tagged]
 
