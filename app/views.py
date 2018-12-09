@@ -504,7 +504,7 @@ def category_page(page_title):
 
 # view for channel page
 @application.route('/channel/<page_title>/', methods=['GET'])
-@application.route('/<page_title>/', methods=['GET'])
+# @application.route('/<page_title>/', methods=['GET'])
 @roles_accepted('admin', 'moderator', 'beta_user')
 def channel_page(page_title):
 	# redirect if url has spaces (we convert them to underscores for friendlier urls)
