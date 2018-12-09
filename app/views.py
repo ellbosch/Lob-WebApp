@@ -59,6 +59,27 @@ def load_more_videos():
 									for p in posts],
                              "error": stop_iteration_hit})
 
+# universal links
+@application.route('/apple-app-site-association/')
+def universal_link():
+	return jsonify(
+				{
+					"activitycontinuation": {
+						"apps": [
+							"QW32W54QW6.com.classapps.TheLobApp"
+						]
+					},
+					"applinks": {
+						"apps": [],
+						"details": [
+							{
+								"appID": "QW32W54QW6.com.classapps.TheLobApp",
+								"paths": ["*"]
+							}
+						]
+					}
+				}
+			)
 
 
 @application.route('/')
