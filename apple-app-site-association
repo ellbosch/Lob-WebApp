@@ -1,13 +1,9 @@
 {
-   "webcredentials": {
-       "apps": ["QW32W54QW6.com.classapps.TheLobApp"]
-    },
-
    "applinks": {
         "apps": [],
         "details": [{
             "appID": "QW32W54QW6.com.classapps.TheLobApp",
-            "paths": ["/", "video/*"]
+            "paths": ["*"]
             }
          ]
     }
