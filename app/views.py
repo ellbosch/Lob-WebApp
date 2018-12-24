@@ -630,20 +630,43 @@ def event_page(page_title):
 @application.route('/video/<video_id>/', methods=['GET'])
 # @roles_accepted('admin', 'moderator', 'beta_user')
 def video_page(video_id):
-	video = None
+	video = get_video_data(video_id)
+
+	events = get_events_for_video(video_id)
+	return render_template('video_page.html', video=video, events=events)
+
+# gets json data of video element (used by mobile app)
+@application.route('/video/<video_id>/json', methods=['GET'])
+def video_json(video_id):
+	is_reddit = True if 'reddit' in video_id else False
+	video = get_video_data(video_id)
+	json_video = {
+		'text': video.text,
+		'url': video.url,
+		'uploaded_at': video.uploaded_at,
+		'league': video.league
+	}
+
+	if is_reddit:
+		return jsonify(results = json_video)
+	else:
+		return jsonify(results= {})
+
+
+# returns video class
+def get_video_data(video_id):
 	is_reddit = True if 'reddit' in video_id else False
 
 	if is_reddit:
-		video = db.session.\
+		return db.session.\
 				query(Videopost.title.label('text'), Videopost.mp4_url.label('url'),
-					Videopost.date_posted.label('uploaded_at')).filter_by(id=video_id).first()
+					Videopost.date_posted.label('uploaded_at'), Videopost.league.label('league')).\
+				filter_by(id=video_id).first()
 	else:
-		video = Video.query.\
+		return Video.query.\
 				join(VideoTextRevision, Video.latest_title_id==VideoTextRevision.text_id).\
 				join(Text, VideoTextRevision.text_id==Text.id).\
 				filter_by(id=video_id).add_columns(Video.url, Text.text).first()
-	events = get_events_for_video(video_id)
-	return render_template('video_page.html', video=video, events=events)
 
 
 ''' ************************************
