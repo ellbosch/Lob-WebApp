@@ -628,7 +628,7 @@ def event_page(page_title):
 
 # video page
 @application.route('/video/<video_id>/', methods=['GET'])
-@roles_accepted('admin', 'moderator', 'beta_user')
+# @roles_accepted('admin', 'moderator', 'beta_user')
 def video_page(video_id):
 	video = None
 	is_reddit = True if 'reddit' in video_id else False
