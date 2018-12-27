@@ -633,7 +633,7 @@ def video_page(video_id):
 	video = get_video_data(video_id)
 
 	events = get_events_for_video(video_id)
-	return render_template('video_page.html', video=video, events=events)
+	return render_template('video_page.html', video=video, events=events, page="video")
 
 # gets json data of video element (used by mobile app)
 @application.route('/video/<video_id>/json', methods=['GET'])

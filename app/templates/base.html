@@ -13,6 +13,13 @@
 
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='loading-spinner.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+
+	<!-- creates link previews -->
+	{% if page != None and page == "video" %}
+		<meta property="og:video" content="{{ video.url }}" />
+		<meta property="og:video:type" content="video/mp4" />
+		<meta property="og:title" content="{{ video.text }}" />
+	{% endif %}
 </head>
 <body>
 	<!-- NAVBAR -->
