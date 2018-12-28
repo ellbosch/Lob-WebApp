@@ -660,7 +660,8 @@ def get_video_data(video_id):
 	if is_reddit:
 		return db.session.\
 				query(Videopost.title.label('text'), Videopost.mp4_url.label('url'),
-					Videopost.date_posted.label('uploaded_at'), Videopost.league.label('league')).\
+					Videopost.date_posted.label('uploaded_at'), Videopost.league.label('league'),
+					Videopost.height.label('height'), Videopost.width.label('width')).\
 				filter_by(id=video_id).first()
 	else:
 		return Video.query.\
