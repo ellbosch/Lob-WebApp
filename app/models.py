@@ -183,6 +183,7 @@ class Videopost(db.Model):
     reddit_comments_url = db.Column(db.String(80))
     url = db.Column(db.String(200), nullable=False)
     mp4_url = db.Column(db.String(200), nullable=False)
+    thumbnail_url = db.Column(db.String(200))
     height = db.Column(db.Integer, nullable=False)
     width = db.Column(db.Integer, nullable=False)
     in_train_set = db.Column(db.Boolean, nullable=False)

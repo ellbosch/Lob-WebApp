@@ -633,7 +633,7 @@ def video_page(video_id):
 	video = get_video_data(video_id)
 
 	events = get_events_for_video(video_id)
-	return render_template('video_page.html', video=video, events=events, page="video")
+	return render_template('video_page.html', video=video, events=events, page="video", video_id=video_id)
 
 # gets json data of video element (used by mobile app)
 @application.route('/video/<video_id>/json', methods=['GET'])
@@ -661,7 +661,8 @@ def get_video_data(video_id):
 		return db.session.\
 				query(Videopost.title.label('text'), Videopost.mp4_url.label('url'),
 					Videopost.date_posted.label('uploaded_at'), Videopost.league.label('league'),
-					Videopost.height.label('height'), Videopost.width.label('width')).\
+					Videopost.height.label('height'), Videopost.width.label('width'),
+					Videopost.thumbnail_url.label('thumbnail_url')).\
 				filter_by(id=video_id).first()
 	else:
 		return Video.query.\
