@@ -165,11 +165,14 @@ def hot_posts():
 	# convert all decimals to floats so the data becomes json serializable
 	for i, league_data in enumerate(data):
 		league = league_data['league']
-		data_json[league] = {}
+		data_json[league] = []
 		for j, post_data in enumerate(league_data['posts']):
-			for k in post_data:
-				v = float(post_data[k])
-				data_json[league][k] = v
+			# update json with serializable attributes
+			post_data['hot_score'] = float(post_data['hot_score'])
+			post_data['width'] = int(post_data['width'])
+			post_data['height'] = int(post_data['height'])
+			post_data['reddit_score'] = int(post_data['reddit_score'])
+			data_json[league].append(post_data)
 
 	return jsonify(result=json.dumps(data_json))
 
