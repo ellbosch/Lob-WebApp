@@ -174,7 +174,7 @@ def hot_posts():
 			post_data['reddit_score'] = int(post_data['reddit_score'])
 			data_json[league].append(post_data)
 
-	return jsonify(result=json.dumps(data_json))
+	return jsonify(result=data_json)
 
 @application.route('/new/<sport>')
 @application.route('/new/')
@@ -188,7 +188,7 @@ def get_new_posts(sport=None):
 	else:
 		posts = Videopost.query.filter_by(league="nba").order_by(desc(Videopost.date_posted)).all()
 		posts_serialized = [p.serialize for p in posts]
-	return jsonify(results = posts_serialized)
+	return jsonify(results=posts_serialized)
 
 
 ''' ************************************
