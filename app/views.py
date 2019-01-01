@@ -11,6 +11,7 @@ from collections import defaultdict
 from werkzeug.datastructures import ImmutableMultiDict
 import pytz
 import json
+import boto3
 
 application.jinja_env.globals['CHANNELS'] = Channel.query.join(Category, Channel.id_cat==Category.id).add_columns(Category.title).all()
 
@@ -146,6 +147,26 @@ def load_sample_data():
 		sample_data.load(current_user.id)
 
 	return render_template('home_page.html')
+
+# gets data for "hot" posts
+@application.route('/hot_posts', methods=['GET'])
+def hot_posts():
+	dynamodb = boto3.resource('dynamodb', region_name="us-west-2")
+	table = dynamodb.Table('lobHotPostsByLeague')
+	response = table.scan()
+	data = response['Items']
+	data_json = {}
+
+	# convert all decimals to floats so the data becomes json serializable
+	for i, league_data in enumerate(data):
+		league = league_data['league']
+		data_json[league] = {}
+		for j, post_data in enumerate(league_data['posts']):
+			for k in post_data:
+				v = float(post_data[k])
+				data_json[league][k] = v
+
+	return jsonify(result=json.dumps(data_json))
 
 
 ''' ************************************
