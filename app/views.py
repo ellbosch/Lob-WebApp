@@ -148,6 +148,11 @@ def load_sample_data():
 
 	return render_template('home_page.html')
 
+
+''' ************************************
+	LOAD DATA
+	************************************'''
+
 # gets data for "hot" posts
 @application.route('/hot_posts', methods=['GET'])
 def hot_posts():
@@ -167,6 +172,20 @@ def hot_posts():
 				data_json[league][k] = v
 
 	return jsonify(result=json.dumps(data_json))
+
+@application.route('/new/<sport>')
+@application.route('/new/')
+@application.route('/new')
+def get_new_posts(sport=None):
+	posts_serialized = []
+	if sport != None:
+		posts = Videopost.query.filter_by(league=sport).order_by(desc(Videopost.date_posted)).all()
+		posts_serialized = [p.serialize for p in posts]
+	# else default to nba
+	else:
+		posts = Videopost.query.filter_by(league="nba").order_by(desc(Videopost.date_posted)).all()
+		posts_serialized = [p.serialize for p in posts]
+	return jsonify(results = posts_serialized)
 
 
 ''' ************************************

@@ -186,7 +186,6 @@ class Videopost(db.Model):
     thumbnail_url = db.Column(db.String(200))
     height = db.Column(db.Integer, nullable=False)
     width = db.Column(db.Integer, nullable=False)
-    in_train_set = db.Column(db.Boolean, nullable=False)
 
     
     # def __init__(self, id=None, title=None, source=None, league=None, date_posted=None, author=None,
@@ -215,28 +214,19 @@ class Videopost(db.Model):
     #     return self.date_posted + timedelta(hours=1)
 
     # serialize for json consumption
-    # @property
-    # def serialize(self):
-    #     return {
-    #         'id': self.id,
-    #         'title': self.title,
-    #         'url': self.url,
-    #         'mp4_url': self.mp4_url,
-    #         'league': self.league,
-    #         'date_posted': self.date_posted,
-    #         'author': self.author,
-    #         'reddit_comments_url': self.reddit_comments_url,
-    #         'reddit_score': self.reddit_score
-    #     }
-
-
-
-
-
-
-
-
-
-
-
-
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'url': self.url,
+            'mp4_url': self.mp4_url,
+            'thumbnail_url': self.thumbnail_url,
+            'league': self.league,
+            'date_posted': self.date_posted,
+            'author': self.author,
+            'reddit_comments_url': self.reddit_comments_url,
+            'reddit_score': self.reddit_score,
+            'height': self.height,
+            'width': self.width
+        }
