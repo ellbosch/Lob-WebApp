@@ -174,7 +174,7 @@ def hot_posts():
 			post_data['reddit_score'] = int(post_data['reddit_score'])
 			data_json[league].append(post_data)
 
-	return jsonify(result=data_json)
+	return jsonify(results=data_json)
 
 @application.route('/new/<sport>')
 @application.route('/new/')
