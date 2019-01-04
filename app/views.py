@@ -1,7 +1,7 @@
 from app import application, db, models, forms, user_datastore, sample_data, security
 from app.forms import RegistrationForm, CategorySubmissionForm, ChannelCreationForm, EventSubmissionForm, VideoSubmissionForm, UserRoleForm
 from app.models import *
-from flask import render_template, request, jsonify, flash, redirect, url_for, Markup
+from flask import render_template, request, jsonify, flash, redirect, url_for, Markup, abort
 from flask_security import current_user, login_required, login_user, logout_user
 from flask_security.utils import hash_password, verify_and_update_password
 from flask_security.decorators import roles_required, roles_accepted
@@ -682,18 +682,16 @@ def video_page(video_id):
 @application.route('/video/<video_id>/json', methods=['GET'])
 def video_json(video_id):
 	is_reddit = True if 'reddit' in video_id else False
-	video = get_video_data(video_id)
-	json_video = {
-		'text': video.text,
-		'url': video.url,
-		'uploaded_at': video.uploaded_at,
-		'league': video.league
-	}
 
 	if is_reddit:
-		return jsonify(results = json_video)
-	else:
-		return jsonify(results= {})
+		video = Videopost.query.get(video_id)
+		
+		if video != None:
+			json_video = video.serialize
+			return jsonify(results=json_video)
+
+	# return 404 if nothing found
+	return abort(404)
 
 
 # returns video class
