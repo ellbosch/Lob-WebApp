@@ -172,6 +172,7 @@ def hot_posts():
 			post_data['width'] = int(post_data['width'])
 			post_data['height'] = int(post_data['height'])
 			post_data['reddit_score'] = int(post_data['reddit_score'])
+			post_data['date_posted'] = datetime.strptime(post_data['date_posted'], "%Y-%m-%d %H:%M:%S")
 			data_json[league].append(post_data)
 
 	return jsonify(results=data_json)
