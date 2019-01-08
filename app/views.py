@@ -670,14 +670,16 @@ def event_page(page_title):
 	return render_template('event_page.html', title=title, page_exists=page_exists,
 		parent_categories=parent_categories, videos=videos)
 
-# video page
+
+# video page: NOW REDIRECTS TO SOURCE URL
 @application.route('/video/<video_id>/', methods=['GET'])
 # @roles_accepted('admin', 'moderator', 'beta_user')
 def video_page(video_id):
 	video = get_video_data(video_id)
 
-	events = get_events_for_video(video_id)
-	return render_template('video_page.html', video=video, events=events, page="video", video_id=video_id)
+	# events = get_events_for_video(video_id)
+	# return render_template('video_page.html', video=video, events=events, page="video", video_id=video_id)
+	return render_template('video_redirect.html', video=video, video_id=video_id, page="video")
 
 # gets json data of video element (used by mobile app)
 @application.route('/video/<video_id>/json', methods=['GET'])
@@ -701,7 +703,7 @@ def get_video_data(video_id):
 
 	if is_reddit:
 		return db.session.\
-				query(Videopost.title.label('text'), Videopost.mp4_url.label('url'),
+				query(Videopost.title.label('text'), Videopost.mp4_url.label('mp4_url'), Videopost.url.label('url'),
 					Videopost.date_posted.label('uploaded_at'), Videopost.league.label('league'),
 					Videopost.height.label('height'), Videopost.width.label('width'),
 					Videopost.thumbnail_url.label('thumbnail_url')).\

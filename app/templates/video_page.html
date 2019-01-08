@@ -7,7 +7,7 @@
         No video found!
     </div>
 {% else %}
-    <video style="max-width: 100%;" loop controls playsinline preload="auto"><source src="{{ video.url }}" type="video/mp4"></video>
+    <video style="max-width: 100%;" loop controls playsinline preload="auto"><source src="{{ video.mp4_url }}" type="video/mp4"></video>
     <h4 class="card-title">{{ video.text }}</h4>
 {% endif %}
 {% endblock %}
