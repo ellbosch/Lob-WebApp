@@ -257,6 +257,10 @@ def user_page(username):
 	return render_template('user_page.html', user=User.query.filter_by(username=username).first(),
 		current_user=current_user)
 
+@application.route('/privacy-policy')
+def privacy_policy():
+    return render_template('privacy_policy.html')
+
 
 ''' ************************************
 	PAGE CREATION
