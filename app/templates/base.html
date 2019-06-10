@@ -107,21 +107,6 @@
 
 	<!-- REST OF BODY -->
 	<div class='container'>
-		<!-- <div class="row">
-			<div class="col-sm-2">
-				<nav class="sticky-top" id="sidebar_container">
-					<span class="navbar-text sidebar_heading">Channels</span>
-					<ul class="nav flex-column">
-						<li class="nav-item">
-							<a class="nav-link active" href="#">Active</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="#">Link</a>
-						</li>
-					</ul>
-				</nav>
-			</div>
-		</div> -->
 		<div id="div_flashed_messages">
 			{% with messages = get_flashed_messages() %}
 				{% if messages %}
@@ -137,6 +122,16 @@
 			{% block content %}{% endblock %}
 		</div>
 	</div>
+
+	<!-- FOOTER -->
+	<footer class="container-fluid bg-light">
+		<div class="container">
+			<p class="text-center">
+				<a class="text-muted" href="{{ url_for('terms_of_service') }}">Terms of Service</a>&emsp;
+				<a class="text-muted" href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+			</p>
+		</div>
+	</footer>
 
 	<!-- store script root -->
 	<span id="script_root" style="display: none;" value="{{ request.script_root|tojson|safe }}"></span>

@@ -261,6 +261,10 @@ def user_page(username):
 def privacy_policy():
     return render_template('privacy_policy.html')
 
+@application.route('/terms-of-service')
+def terms_of_service():
+    return render_template('terms_of_service.html')
+
 
 ''' ************************************
 	PAGE CREATION
