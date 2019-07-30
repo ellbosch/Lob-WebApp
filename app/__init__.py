@@ -42,48 +42,4 @@ user_datastore = SQLAlchemyUserDatastore(db, models.User, models.Role)
 from app.forms import ExtendedLoginForm
 security = Security(application, user_datastore, login_form=ExtendedLoginForm)
 
-
-
-# DELETE DIS
-# create moderator and admin roles
-# user_datastore.create_role(name='admin')
-# user_datastore.create_role(name='moderator')
-# user_datastore.create_role(name='beta_user')
-# user_datastore.create_role(name='scraper')
-
-# makes admin an "admin" again
-# user = User.query.filter_by(username='admin').first()
-# user = user_datastore.get_user(user.id)
-# admin = user_datastore.find_role('admin')
-# user_datastore.add_role_to_user(user, admin)
-# db.session.commit()
-
-
-# from flask_security.utils import hash_password
-# from datetime import datetime
-# with application.app_context():
-# 	user_datastore.create_user(username='admin', email='admin@lob.tv',
-# 					password=hash_password('Cupcake2777'), roles=['admin'],
-# 					firstname="lebron", lastname="james", 
-# 					created_at=datetime.utcnow(), login_count=0)
-# db.session.commit()
-
-from app import views
-
-# import pytz
-# from datetime import datetime
-# events = models.Event.query.all()
-# tz = pytz.timezone("US/Pacific")
-# for e in events:
-# 	# print(tz.localize(datetime.utcnow()) - e.start_time)
-# 	print(e.start_time)
-# 	event = db.session.query(Event).get(e.id)
-# 	event.start_time = tz.localize(event.start_time)
-# 	print(event.start_time)
-# 	# db.session.merge(e)
-# try:
-# 	db.session.commit()
-# 	print("should work...")
-# except Exception as e:
-# 	print("??")
-# 	raise e
+from app.api.v1 import views
