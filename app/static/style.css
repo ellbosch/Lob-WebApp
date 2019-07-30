@@ -59,3 +59,19 @@ footer {
 	margin-top: 40px;
 	padding: 40px 0;
 }
+
+/* section number incrementer for TOS and privacy policy */
+.div-legal {
+	counter-reset: section;
+}
+.div-legal h2 {
+	counter-reset: subsection;
+}
+.div-legal h2:before {
+	counter-increment: section;
+	content: counter(section) ".        ";
+}
+.div-legal h3:before {
+	counter-increment: subsection;
+	content: counter(section) "." counter(subsection) " ";
+}
