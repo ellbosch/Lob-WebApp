@@ -25,12 +25,10 @@ def get_hot_posts():
 	table = dynamodb.Table('lobHotPostsByLeague')
 	response = table.scan()
 	data = response['Items']
-	data_json = {}
+	data_json = []
 
 	# convert all decimals to floats so the data becomes json serializable
 	for i, league_data in enumerate(data):
-		league = league_data['league']
-		data_json[league] = []
 		for j, post_data in enumerate(league_data['posts']):
 			# update json with serializable attributes
 			post_data['hot_score'] = float(post_data['hot_score'])
@@ -38,7 +36,10 @@ def get_hot_posts():
 			post_data['height'] = int(post_data['height'])
 			post_data['reddit_score'] = int(post_data['reddit_score'])
 			post_data['date_posted'] = datetime.strptime(post_data['date_posted'], "%Y-%m-%d %H:%M:%S")
-			data_json[league].append(post_data)
+			data_json.append(post_data)
+
+	# sort array by hot score
+	data_json = sorted(data_json, key=lambda x: x['hot_score'], reverse=True)
 
 	return jsonify(results=data_json)
 
