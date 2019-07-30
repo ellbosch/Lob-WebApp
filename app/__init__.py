@@ -18,22 +18,6 @@ db = SQLAlchemy(application)
 
 from app import models			# import model BEFORE creating tables and after db, otherwise it breaks
 
-
-
-
-# DELETE THIS: drop tables
-from app.models import * 
-# LinkToCategory.__table__.drop(db.engine)
-# VideoLinkToEvent.__table__.drop(db.engine)
-# Channel.__table__.drop(db.engine)
-# Category.__table__.drop(db.engine)
-# Video.__table__.drop(db.engine)
-# VideoTextRevision.__table__.drop(db.engine)
-# Event.__table__.drop(db.engine)
-# Text.__table__.drop(db.engine)
-
-
-
 db.create_all() 				# In case user table doesn't exists already. Else remove it.    
 db.session.commit() 			# This is needed to write the changes to database
 
@@ -42,4 +26,8 @@ user_datastore = SQLAlchemyUserDatastore(db, models.User, models.Role)
 from app.forms import ExtendedLoginForm
 security = Security(application, user_datastore, login_form=ExtendedLoginForm)
 
-from app.api.v1 import views
+
+from app.api.v0.routes import api_v0
+from app.api.v1.routes import api_v1
+application.register_blueprint(api_v0)
+application.register_blueprint(api_v1, url_prefix='/api/v1')
