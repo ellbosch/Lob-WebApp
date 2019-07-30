@@ -72,11 +72,12 @@ def load_more_videos():
 def posts():
 	channel = request.args.get('channel')
 	sort = request.args.get('sort')
+	page = int(request.args.get('page') or 1)		# the 'or 1' ensures we have some page number
 
 	if sort == 'trending':
 		return get_hot_posts()
 	
-	return get_posts_for_channel(channel)
+	return get_posts_for_channel(channel, page)
 
 # returns trending content
 def get_hot_posts():
@@ -102,11 +103,14 @@ def get_hot_posts():
 	return jsonify(results=data_json)
 
 # posts sorted by date per inputted channels
-def get_posts_for_channel(channel=None):
+def get_posts_for_channel(channel, page):
 	posts_serialized = []
 
+	if channel == None:
+		abort(400)
+
 	if channel != None:
-		posts = Videopost.query.filter_by(league=channel).order_by(desc(Videopost.date_posted)).all()
+		posts = Videopost.query.filter_by(league=channel).order_by(desc(Videopost.date_posted)).paginate(page=page, per_page=10).items
 		posts_serialized = [p.serialize for p in posts]
 
 	return jsonify(results=posts_serialized)
