@@ -1,0 +1,25 @@
+{
+  "name": "lob",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"cd backend && node server.js\" \"cd client && npm start\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ellbosch/Lob.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ellbosch/Lob/issues"
+  },
+  "homepage": "https://github.com/ellbosch/Lob#readme",
+  "dependencies": {
+    "backend": "file:backend",
+    "client": "file:client",
+    "concurrently": "^4.1.2"
+  }
+}
