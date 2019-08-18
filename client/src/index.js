@@ -1,17 +1,27 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import './index.css';
-import App from './App';
-import reducer from './reducers.js';
+import rootReducer from './reducers';
+import App from './components/App';
 import * as serviceWorker from './serviceWorker';
 
-const store = createStore(reducer, window.STATE_FROM_SERVER);
+// CSS
+import 'bootstrap/dist/css/bootstrap.css';
+import './index.css';
+
+// JS
+import 'jquery';
+import 'bootstrap/dist/js/bootstrap.js';
+
+const store = createStore(rootReducer, window.STATE_FROM_SERVER);
 
 ReactDOM.render(
     <Provider store={store}>
-        <App />
+        <Router>
+            <Route path="/" component={App} />
+        </Router>
     </Provider>,
     document.getElementById('root')
 );
