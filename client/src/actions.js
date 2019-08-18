@@ -9,6 +9,6 @@ export const VisibilityFilters = {
 }
 
 // action creators
-export function changeSport(sport) {
-    return { type: CHANGE_SPORT, sport }
+export function toggleChannel(channel) {
+    return { type: TOGGLE_CHANNEL, channel }
 }
