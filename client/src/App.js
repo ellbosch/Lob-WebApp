@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 function App() {
-    const [videoPosts, setVideoPosts] = useState([]);
 
     useEffect(() => {
         fetch('/video-posts/')
@@ -14,6 +13,7 @@ function App() {
     });
     return (
         <div>
+            <h1>Hello</h1>
         </div>
     );
 }
