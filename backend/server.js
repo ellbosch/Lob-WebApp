@@ -1,28 +1,28 @@
-// const bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
 const express = require('express');
+const fetch = require('node-fetch');
 const path = require('path');
 
 const app = express();
 const API_PORT = process.env.HTTP_PORT || 3001;
 
 app.use(express.static(path.join(__dirname, '../client/build')));
-// app.use(bodyParser.json());
+app.use(bodyParser.json());
 
 app.get('/', function(req, res) {
 	res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
 });
 
-// create router for bloomfilter
-// var bfRouter = express.Router();
+// create router for video posts
+var videoPostsRouter = express.Router();
 
-// // gets info on bloom filter (i.e. it's size)
-// bfRouter.get('/', function(req, res) {
-// 	res.json(
-// 		{
-// 			size: bf.sizePowerOfTen,
-// 			algorithms: { 'MD5': this.usesMd5, 'SHA-1': this.usesSha1, 'SHA-256': this.usesSha256 }
-// 		});
-// });
+// gets info on bloom filter (i.e. it's size)
+videoPostsRouter.get('/', function(req, res) {
+    fetch('https://lob.tv/api/v1/posts?channel=nba&page=1')
+        .then(res => res.json())
+        .then(json => res.send(json));
+});
+app.use('/video-posts', videoPostsRouter);
 
 // // creates new bloom filter and sets size of bit vector
 // bfRouter.post('/', function(req, res, next) {
@@ -49,7 +49,6 @@ app.get('/', function(req, res) {
 // 	res.json({ contains: result });
 // });
 
-// app.use('/bloomfilter', bfRouter);
 
 // // catch errors at very end
 // app.use(function (err, req, res, next) {
