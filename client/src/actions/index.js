@@ -4,7 +4,7 @@ import fetch from 'cross-fetch';
 export const SET_VISIBILITY_FILTER = 'SET_VISIBILITY_FILTER';
 
 export const VisibilityFilters = {
-    SHOW_ALL: 'SELECT_ALL',
+    SELECT_ALL: 'SELECT_ALL',
     SELECT_CHANNEL: 'SELECT_CHANNEL'
 }
 

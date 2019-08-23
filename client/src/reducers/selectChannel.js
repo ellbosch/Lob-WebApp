@@ -1,12 +1,12 @@
-import { SELECT_CHANNEL } from '../actions';
+// import { SELECT_CHANNEL } from '../actions';
 
-function selectChannel(state='', action) {
-    switch (action.type) {
-        case SELECT_CHANNEL:
-            return action.channel;
-        default:
-            return state;
-    }
-}
+// function selectChannel(state='', action) {
+//     switch (action.type) {
+//         case SELECT_CHANNEL:
+//             return action.channel;
+//         default:
+//             return state;
+//     }
+// }
 
-export default selectChannel;
+// export default selectChannel;

@@ -4,10 +4,13 @@ import { useSelector } from 'react-redux';
 
 
 const VideoPostList = () => {
-    const videoPosts = useSelector(state => state.items)
+    const filter = useSelector(state => state.visibilityFilter)
 
     return (
-        <div>Whatever</div>
+        <div>
+            <p>Videos:</p>
+            {filter}
+        </div>
     );
 }
 

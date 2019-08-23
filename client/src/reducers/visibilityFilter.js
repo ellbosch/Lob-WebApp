@@ -1,8 +1,8 @@
 import { SET_VISIBILITY_FILTER, VisibilityFilters } from '../actions';
-const { SHOW_ALL } = VisibilityFilters;
+const { SELECT_ALL } = VisibilityFilters;
 
 // reducer composition for filter view
-function visibilityFilter(state=SHOW_ALL, action) {
+function visibilityFilter(state=SELECT_ALL, action) {
     switch (action.type) {
         case SET_VISIBILITY_FILTER:
             return action.filter;
