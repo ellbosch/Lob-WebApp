@@ -1,10 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import thunkMiddleware from 'redux-thunk';
+import { createLogger } from 'redux-logger';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
-import { createStore } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
+// import { selectChannel, fetchVideoPosts } from './actions';
 import rootReducer from './reducers';
-import App from './components/App';
+import App from './containers/App';
 import * as serviceWorker from './serviceWorker';
 
 // CSS
@@ -15,7 +18,18 @@ import './index.css';
 import 'jquery';
 import 'bootstrap/dist/js/bootstrap.js';
 
-const store = createStore(rootReducer, window.STATE_FROM_SERVER);
+const loggerMiddleware = createLogger();
+
+const store = createStore(
+    rootReducer,
+    applyMiddleware(
+        thunkMiddleware,
+        loggerMiddleware
+    )
+);
+
+// store.dispatch(selectChannel('nba'));
+// store.dispatch(fetchVideoPosts('nba')).then(() => console.log(store.getState()));
 
 ReactDOM.render(
     <Provider store={store}>

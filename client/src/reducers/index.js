@@ -4,7 +4,9 @@ import videoPosts from './videoPosts';
 import visibilityFilter from './visibilityFilter.js';
 
 // main app reducer
-export default combineReducers({
-    videoPosts,
-    visibilityFilter
+const rootReducer = combineReducers({
+    visibilityFilter,
+    videoPosts
 });
+
+export default rootReducer;

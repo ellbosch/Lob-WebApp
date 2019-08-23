@@ -1,12 +1,17 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { NavLink } from 'react-router-dom';
-import { setVisibilityFilter } from '../actions';
+import { selectChannel } from '../actions';
 
-const ChannelLink = ({ channel, children }) => (
-    <NavLink exact to={channel === 'SELECT_ALL' ? '/' : `/${channel}`}>
-        {children}
-    </NavLink>
-);
+const ChannelLink = ({ filter, channel, children }) => {
+    const dispatch = useDispatch();
+
+    return (
+        <NavLink exact to={filter === 'SELECT_ALL' ? '/' : `/${channel}`}
+            onClick={() => dispatch(selectChannel({channel}))}>
+            {children}
+        </NavLink>
+    );
+}
 
 export default ChannelLink;

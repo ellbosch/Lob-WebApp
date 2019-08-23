@@ -2,17 +2,16 @@ import React from 'react';
 import ChannelLink from '../containers/ChannelLink';
 import { VisibilityFilters } from '../actions';
 
-const ChannelNav = (channels) => (
+const ChannelNav = ({channels}) => (
     <ul className="nav flex-column">
         <li className="nav-item">
-            <ChannelLink channel={VisibilityFilters.SHOW_ALL}>All</ChannelLink>
+            <ChannelLink filter={VisibilityFilters.SHOW_ALL} key="SHOW_ALL">All</ChannelLink>
         </li>
-        <li className="nav-item">
-            <ChannelLink channel="nba">NBA</ChannelLink>
-        </li>
-        <li className="nav-item">
-            <ChannelLink channel="nfl">NFL</ChannelLink>
-        </li>
+        {channels.map(channel =>
+            <li className="nav-item">
+                <ChannelLink filter={VisibilityFilters.SELECT_CHANNEL} key={channel} channel={channel}>{channel}</ChannelLink>
+            </li>)
+        }
     </ul>
 );
 
