@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { render } from 'react-dom';
 import thunkMiddleware from 'redux-thunk';
 import { createLogger } from 'redux-logger';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
@@ -31,7 +31,7 @@ const store = createStore(
 // store.dispatch(selectChannel('nba'));
 // store.dispatch(fetchVideoPosts('nba')).then(() => console.log(store.getState()));
 
-ReactDOM.render(
+render(
     <Provider store={store}>
         <Router>
             <Route path="/" component={App} />
