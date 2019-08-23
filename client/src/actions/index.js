@@ -1,20 +1,16 @@
-// // action types
-// export const SET_VISIBILITY_FILTER = 'SET_VISIBILITY_FILTER';
+// import fetch from 'cross-fetch';
 
-// // other constants
-// export const VisibilityFilters = {
-//     SHOW_ALL: 'SHOW_ALL',
-//     SHOW_NBA: 'nba',
-//     SHOW_NFL: 'nfl'
-// }
+// action for visibility filter
+export const SET_VISIBILITY_FILTER = 'SET_VISIBILITY_FILTER';
 
-
-// action for selecting channel
-export const SELECT_CHANNEL = 'SELECT_CHANNEL';
+export const VisibilityFilters = {
+    SHOW_ALL: 'SELECT_ALL',
+    SELECT_CHANNEL: 'SELECT_CHANNEL'
+}
 
 export const selectChannel = (channel) => {
     return {
-        type: SELECT_CHANNEL,
+        type: VisibilityFilters.SELECT_CHANNEL,
         channel
     }
 }

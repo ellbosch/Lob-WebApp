@@ -8,10 +8,10 @@ const ChannelNav = (channels) => (
             <ChannelLink channel={VisibilityFilters.SHOW_ALL}>All</ChannelLink>
         </li>
         <li className="nav-item">
-            <ChannelLink channel={VisibilityFilters.SHOW_NBA}>NBA</ChannelLink>
+            <ChannelLink channel="nba">NBA</ChannelLink>
         </li>
         <li className="nav-item">
-            <ChannelLink channel={VisibilityFilters.SHOW_NFL}>NFL</ChannelLink>
+            <ChannelLink channel="nfl">NFL</ChannelLink>
         </li>
     </ul>
 );

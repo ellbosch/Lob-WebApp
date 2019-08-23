@@ -1,4 +1,4 @@
-import { SELECT_CHANNEL, REQUEST_POSTS, RECEIVE_POSTS } from './actions';
+import { REQUEST_POSTS, RECEIVE_POSTS } from '../actions';
 
 // reducer composition for channels
 function videoPosts(
@@ -8,10 +8,6 @@ function videoPosts(
     }, action) {
 
     switch (action.type) {
-        // case SELECT_CHANNEL:
-        //     return Object.assign({}, state, {
-        //         isFetching: true
-        //     });
         case REQUEST_POSTS:
             return Object.assign({}, state, {
                 isFetching: true
@@ -27,4 +23,16 @@ function videoPosts(
     }
 }
 
-export default videoPosts;
+function videoPostsByChannel(state={}, action) {
+    switch (action.type) {
+        case RECEIVE_POSTS:
+        case REQUEST_POSTS:
+            return Object.assign({}, state, {
+                [action.channel]: videoPosts(state[action.channel], action)
+            });
+        default:
+            return state;
+    }
+}
+
+export default videoPostsByChannel;
