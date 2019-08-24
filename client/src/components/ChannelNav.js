@@ -4,12 +4,12 @@ import { VisibilityFilters } from '../actions';
 
 const ChannelNav = ({channels}) => (
     <ul className="nav flex-column">
-        <li className="nav-item">
-            <ChannelLink filter={VisibilityFilters.SELECT_ALL} key="SELECT_ALL">All</ChannelLink>
+        <li className="nav-item" key="SELECT_ALL">
+            <ChannelLink filter={VisibilityFilters.SELECT_ALL}>All</ChannelLink>
         </li>
         {channels.map(channel =>
-            <li className="nav-item">
-                <ChannelLink filter={VisibilityFilters.SELECT_CHANNEL} key={channel} channel={channel}>{channel}</ChannelLink>
+            <li className="nav-item" key={channel}>
+                <ChannelLink filter={VisibilityFilters.SELECT_CHANNEL} channel={channel}>{channel}</ChannelLink>
             </li>)
         }
     </ul>

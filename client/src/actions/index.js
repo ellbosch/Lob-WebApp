@@ -10,7 +10,7 @@ export const VisibilityFilters = {
 
 export const selectChannel = (channel) => {
     return {
-        type: VisibilityFilters.SELECT_CHANNEL,
+        type: SET_VISIBILITY_FILTER,
         channel
     }
 }

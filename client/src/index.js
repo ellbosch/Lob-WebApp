@@ -28,9 +28,6 @@ const store = createStore(
     )
 );
 
-// store.dispatch(selectChannel('nba'));
-// store.dispatch(fetchVideoPosts('nba')).then(() => console.log(store.getState()));
-
 render(
     <Provider store={store}>
         <Router>

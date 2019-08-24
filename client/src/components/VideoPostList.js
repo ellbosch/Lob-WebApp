@@ -4,12 +4,12 @@ import { useSelector } from 'react-redux';
 
 
 const VideoPostList = () => {
-    const filter = useSelector(state => state.visibilityFilter)
+    const channel = useSelector(state => state.visibilityFilter.channel);
 
     return (
         <div>
             <p>Videos:</p>
-            {filter}
+            {channel}
         </div>
     );
 }
