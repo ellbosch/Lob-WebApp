@@ -32,9 +32,9 @@ const receivePosts = (channel, json) => {
   return {
         type: RECEIVE_POSTS,
         channel,
-        posts: json.data,
+        items: json.results,
         receivedAt: Date.now()
-  }
+    }
 }
 
 export function fetchVideoPosts(channel) {
@@ -48,8 +48,6 @@ export function fetchVideoPosts(channel) {
             error => console.log('An error occurred.', error)
         )
         .then(result => {
-            console.log(result);
-
             // update app state with results
             dispatch(receivePosts(channel, result))
         })

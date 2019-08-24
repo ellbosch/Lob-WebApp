@@ -1,15 +1,23 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { VisibilityFilters } from '../actions';
 
 
 const VideoPostList = () => {
     const channel = useSelector(state => state.visibilityFilter.channel);
+    const videoPosts = useSelector(state => state.videoPostsByChannel.items);
 
     return (
         <div>
-            <p>Videos:</p>
-            {channel}
+            <h3>{channel === VisibilityFilters.SELECT_ALL ? "All Posts" : channel}</h3>
+
+            {videoPosts.map(videoPost =>
+                <li className="nav-item" key={videoPost.id}>
+                    {videoPost.title}
+                </li>)
+            }
+            {/* {videoPosts.length} */}
         </div>
     );
 }

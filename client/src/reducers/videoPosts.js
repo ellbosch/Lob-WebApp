@@ -15,7 +15,7 @@ function videoPosts(
         case RECEIVE_POSTS:
             return Object.assign({}, state, {
                 isFetching: false,
-                items: action.posts,
+                items: action.items,
                 lastUpdate: action.received_at
             });
         default:
@@ -23,13 +23,11 @@ function videoPosts(
     }
 }
 
-function videoPostsByChannel(state={}, action) {
+function videoPostsByChannel(state={ items: [] }, action) {
     switch (action.type) {
         case RECEIVE_POSTS:
         case REQUEST_POSTS:
-            return Object.assign({}, state, {
-                [action.channel]: videoPosts(state[action.channel], action)
-            });
+            return videoPosts(state[action.channel], action);
         default:
             return state;
     }
