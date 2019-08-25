@@ -1,8 +1,35 @@
 const bodyParser = require('body-parser');
 const express = require('express');
 const fetch = require('node-fetch');
+const mysql = require('mysql');
 const path = require('path');
+require('dotenv').config();
 
+console.log(process.env.RDS_HOSTNAME);
+
+// mysql connection details
+const connection = mysql.createConnection({
+    host        : process.env.RDS_HOSTNAME,
+    user        : process.env.RDS_USERNAME,
+    password    : process.env.RDS_PASSWORD,
+    port        : process.env.RDS_PORT,
+    database    : process.env.RDS_DB,
+    charset     : process.env.RDS_CHARSET
+})
+
+connection.connect(function(err) {
+    if (err) {
+        console.error('Database connection failed: ' + err.stack);
+        return;
+    }
+
+    console.log('Connected to database.');
+});
+  
+connection.end();
+
+
+// express configuration
 const app = express();
 const API_PORT = process.env.HTTP_PORT || 3001;
 
