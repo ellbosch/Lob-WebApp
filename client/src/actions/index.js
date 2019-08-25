@@ -8,9 +8,18 @@ export const VisibilityFilters = {
     SELECT_CHANNEL: 'SELECT_CHANNEL'
 }
 
+export const selectAllChannels = () => {
+    return {
+        type: SET_VISIBILITY_FILTER,
+        filter: VisibilityFilters.SELECT_ALL,
+        channel: ''
+    }
+}
+
 export const selectChannel = (channel) => {
     return {
         type: SET_VISIBILITY_FILTER,
+        filter: VisibilityFilters.SELECT_CHANNEL,
         channel
     }
 }
@@ -42,15 +51,17 @@ export function fetchVideoPosts(channel) {
         // inform app state that api call is starting
         dispatch(requestPosts(channel));
 
-        return fetch('/video-posts/')
-        .then(
-            res => res.json(),
-            error => console.log('An error occurred.', error)
-        )
-        .then(result => {
-            // update app state with results
-            dispatch(receivePosts(channel, result))
-        })
+        const apiPath = (channel !== '') ? '/api/v1/posts?channel=' + channel : 'api/v1/posts';
+
+        return fetch(apiPath)
+            .then(
+                res => res.json(),
+                error => console.log('An error occurred.', error)
+            )
+            .then(result => {
+                // update app state with results
+                dispatch(receivePosts(channel, result))
+            })
     }
 }
                 
