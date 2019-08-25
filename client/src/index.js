@@ -5,9 +5,8 @@ import { createLogger } from 'redux-logger';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
-// import { selectChannel, fetchVideoPosts } from './actions';
 import rootReducer from './reducers';
-import App from './containers/App';
+import App from './components/App';
 import * as serviceWorker from './serviceWorker';
 
 // CSS
