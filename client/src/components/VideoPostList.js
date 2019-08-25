@@ -17,7 +17,6 @@ const VideoPostList = () => {
                     {videoPost.title}
                 </li>)
             }
-            {/* {videoPosts.length} */}
         </div>
     );
 }

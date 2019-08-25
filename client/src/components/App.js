@@ -8,6 +8,7 @@ const App = () => {
     const dispatch = useDispatch();
     const channel = useSelector(state => state.visibilityFilter.channel);
 
+    // fetches video posts on first load
     useEffect(() => {
         dispatch(fetchVideoPosts(channel));
     }, []);
