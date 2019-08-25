@@ -1,33 +1,25 @@
 const bodyParser = require('body-parser');
 const express = require('express');
 const fetch = require('node-fetch');
-const mysql = require('mysql');
 const path = require('path');
+const Sequelize = require('sequelize');
 require('dotenv').config();
 
-console.log(process.env.RDS_HOSTNAME);
-
-// mysql connection details
-const connection = mysql.createConnection({
+// DB connection
+const sequelize = new Sequelize( process.env.RDS_DB, process.env.RDS_USERNAME, process.env.RDS_PASSWORD, {
+    dialect     : 'mysql',
     host        : process.env.RDS_HOSTNAME,
-    user        : process.env.RDS_USERNAME,
-    password    : process.env.RDS_PASSWORD,
     port        : process.env.RDS_PORT,
-    database    : process.env.RDS_DB,
-    charset     : process.env.RDS_CHARSET
-})
-
-connection.connect(function(err) {
-    if (err) {
-        console.error('Database connection failed: ' + err.stack);
-        return;
-    }
-
-    console.log('Connected to database.');
+    define      : { charset: process.env.RDS_CHARSET }
 });
-  
-connection.end();
-
+sequelize
+    .authenticate()
+    .then(() => {
+        console.log('Connection to DB has been established');
+    })
+    .catch(err => {
+        console.error('Unable to connect to DB:', err);
+    })
 
 // express configuration
 const app = express();
@@ -39,16 +31,6 @@ app.use(bodyParser.json());
 app.get('/', function(req, res) {
 	res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
 });
-
-// // create router for video posts
-// var videoPostsRouter = express.Router();
-
-// videoPostsRouter.get('/', function(req, res) {
-//     fetch('https://lob.tv/api/v1/posts?channel=nba&page=1')
-//         .then(res => res.json())
-//         .then(json => res.send(json));
-// });
-// app.use('/video-posts', videoPostsRouter);
 
 // v1 api calls
 const getPosts1 = (req, res) => {
