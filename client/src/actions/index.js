@@ -25,7 +25,7 @@ export const selectChannel = (channel) => {
 }
 
 // action for requesting video posts
-export const REQUEST_POSTS = 'REQUEST_POSTS'
+export const REQUEST_POSTS = 'REQUEST_POSTS';
 
 const requestPosts = (channel) => {
     return {
@@ -35,7 +35,7 @@ const requestPosts = (channel) => {
 }
 
 // acton for receiving posts
-export const RECEIVE_POSTS = 'RECEIVE_POSTS'
+export const RECEIVE_POSTS = 'RECEIVE_POSTS';
 
 const receivePosts = (channel, json) => {
   return {

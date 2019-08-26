@@ -2,24 +2,11 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const fetch = require('node-fetch');
 const path = require('path');
-const Sequelize = require('sequelize');
-require('dotenv').config();
+const { VideoPost } = require('./db');
 
-// DB connection
-const sequelize = new Sequelize( process.env.RDS_DB, process.env.RDS_USERNAME, process.env.RDS_PASSWORD, {
-    dialect     : 'mysql',
-    host        : process.env.RDS_HOSTNAME,
-    port        : process.env.RDS_PORT,
-    define      : { charset: process.env.RDS_CHARSET }
-});
-sequelize
-    .authenticate()
-    .then(() => {
-        console.log('Connection to DB has been established');
-    })
-    .catch(err => {
-        console.error('Unable to connect to DB:', err);
-    })
+VideoPost.findAll().then(posts => {
+   console.log(posts);
+})
 
 // express configuration
 const app = express();
