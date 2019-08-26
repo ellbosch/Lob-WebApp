@@ -15,7 +15,7 @@ function videoPosts(
         case RECEIVE_POSTS:
             return Object.assign({}, state, {
                 isFetching: false,
-                items: action.items,
+                items: state.items.concat(action.items),
                 lastUpdate: action.received_at
             });
         default:

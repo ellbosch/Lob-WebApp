@@ -17,20 +17,22 @@ app.get('/', function(req, res) {
 
 // v1 api calls
 const getPosts1 = (req, res) => {
+    const limit = 10;
     const channel = req.query.channel;
+    const page = (typeof req.query.page !== 'undefined') ? parseInt(req.query.page) : 0;
 
     if (typeof channel !== 'undefined') {
-        // 'https://lob.tv/api/v1/posts?page=1&channel=' + channel 
         VideoPost.findAll({
-            where: {
-                league: channel
-            },
-            order: [['date_posted', 'DESC']]
+            where: { league: channel },
+            order: [ ['date_posted', 'DESC'] ],
+            limit: limit,
+            offset: page * limit
         }).then(videoPosts => {
-            console.log(videoPosts);
+            for (let i = 0; i < videoPosts.length; i++) {
+                console.log(videoPosts[i].title);
+            }
             res.json({ results: videoPosts })
         });
-
     } else {
         fetch('https://lob.tv/api/v1/posts?page=1&sort=trending')
         .then(res => res.json())

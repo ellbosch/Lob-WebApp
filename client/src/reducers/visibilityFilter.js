@@ -5,7 +5,7 @@ const { SELECT_ALL } = VisibilityFilters;
 function visibilityFilter(state={channel: SELECT_ALL}, action) {
     switch (action.type) {
         case SET_VISIBILITY_FILTER:
-            return action.channel;
+            return action;
         default:
             return state;
     }

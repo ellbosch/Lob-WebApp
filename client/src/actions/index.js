@@ -34,7 +34,7 @@ const requestPosts = (channel) => {
     }
 }
 
-// acton for receiving posts
+// action for receiving posts
 export const RECEIVE_POSTS = 'RECEIVE_POSTS';
 
 const receivePosts = (channel, json) => {
@@ -46,12 +46,13 @@ const receivePosts = (channel, json) => {
     }
 }
 
-export function fetchVideoPosts(channel) {
+// fetches videos given a specified channel and page
+export function fetchVideoPosts(channel, page=0) {
     return function(dispatch) {
         // inform app state that api call is starting
         dispatch(requestPosts(channel));
 
-        const apiPath = (channel !== '') ? '/api/v1/posts?channel=' + channel : 'api/v1/posts';
+        const apiPath = (channel !== '') ? '/api/v1/posts?channel=' + channel + '&page=' + page : 'api/v1/posts';
 
         return fetch(apiPath)
             .then(
