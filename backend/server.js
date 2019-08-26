@@ -4,10 +4,6 @@ const fetch = require('node-fetch');
 const path = require('path');
 const { VideoPost } = require('./db');
 
-VideoPost.findAll().then(posts => {
-   console.log(posts);
-})
-
 // express configuration
 const app = express();
 const API_PORT = process.env.HTTP_PORT || 3001;
@@ -22,11 +18,25 @@ app.get('/', function(req, res) {
 // v1 api calls
 const getPosts1 = (req, res) => {
     const channel = req.query.channel;
-    const apiPath = (typeof channel !== 'undefined') ? 'https://lob.tv/api/v1/posts?page=1&channel=' + channel : 'https://lob.tv/api/v1/posts?page=1&sort=trending';
 
-    fetch(apiPath)
-    .then(res => res.json())
-    .then(json => res.send(json));
+    if (typeof channel !== 'undefined') {
+        // 'https://lob.tv/api/v1/posts?page=1&channel=' + channel 
+        VideoPost.findAll({
+            where: {
+                league: channel
+            },
+            order: [['date_posted', 'DESC']]
+        }).then(videoPosts => {
+            console.log(videoPosts);
+            res.json({ results: videoPosts })
+        });
+
+    } else {
+        fetch('https://lob.tv/api/v1/posts?page=1&sort=trending')
+        .then(res => res.json())
+        .then(json => res.send(json));
+    }
+
 }
 
 // routers for different api versions
