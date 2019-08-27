@@ -1,22 +1,28 @@
-import { REQUEST_POSTS, RECEIVE_POSTS } from '../actions';
+import { REQUEST_POSTS, RECEIVE_POSTS, CLEAR_POSTS } from '../actions';
 
 // reducer composition for channels
 function videoPosts(
     state={
         isFetching: false,
-        items: []
+        items: [],
+        page: 0
     }, action) {
 
     switch (action.type) {
+        case CLEAR_POSTS:
+            return Object.assign({}, state, {
+                items: [],
+                page: 0
+            });
         case REQUEST_POSTS:
-            console.log(state.items);
             return Object.assign({}, state, {
                 isFetching: true
             });
         case RECEIVE_POSTS:
             return Object.assign({}, state, {
                 isFetching: false,
-                items: [...state.items, ...action.items],
+                items: action.items,
+                page: state.page + 1,
                 lastUpdate: action.received_at
             });
         default:
@@ -26,9 +32,10 @@ function videoPosts(
 
 function videoPostsByChannel(state={ items: [] }, action) {
     switch (action.type) {
+        case CLEAR_POSTS:
         case RECEIVE_POSTS:
         case REQUEST_POSTS:
-            return videoPosts(state[action.channel], action);
+            return videoPosts(state, action);
         default:
             return state;
     }

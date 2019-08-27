@@ -20,7 +20,6 @@ const getPosts1 = (req, res) => {
     const limit = 10;
     const channel = req.query.channel;
     const page = (typeof req.query.page !== 'undefined') ? parseInt(req.query.page) : 0;
-    console.log(page);
 
     if (typeof channel !== 'undefined') {
         VideoPost.findAll({
@@ -29,9 +28,6 @@ const getPosts1 = (req, res) => {
             limit: limit,
             offset: page * limit
         }).then(videoPosts => {
-            for (let i = 0; i < videoPosts.length; i++) {
-                // console.log(videoPosts[i].title);
-            }
             res.json({ results: videoPosts })
         });
     } else {

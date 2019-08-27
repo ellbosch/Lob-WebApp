@@ -1,19 +1,20 @@
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchVideoPosts, VisibilityFilters } from '../actions';
 
 
 const VideoPostList = () => {
-    const [page, setPage] = useState(0);
+    // const [page, setPage] = useState(0);
     const filter = useSelector(state => state.visibilityFilter.filter);
     const channel = useSelector(state => state.visibilityFilter.channel);
     const videoPosts = useSelector(state => state.videoPostsByChannel.items);
     const dispatch = useDispatch();
 
     const fetchNextPosts = () => {
-        setPage(page + 1);
-        dispatch(fetchVideoPosts(channel, page));
+        // setPage(page + 1);
+        // dispatch(fetchVideoPosts(channel, page));
+        dispatch(fetchVideoPosts(channel));
     }
 
     return (

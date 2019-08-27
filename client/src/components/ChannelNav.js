@@ -1,17 +1,19 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import ChannelLink from '../containers/ChannelLink';
-import { VisibilityFilters, selectChannel, selectAllChannels, fetchVideoPosts } from '../actions';
+import { VisibilityFilters, clearPosts, selectChannel, selectAllChannels, fetchVideoPosts } from '../actions';
 
 const ChannelNav = ({channels}) => {
     const dispatch = useDispatch();
 
     const handleClickForAll = () => {
+        dispatch(clearPosts());
         dispatch(selectAllChannels());
         dispatch(fetchVideoPosts(''));
     }
 
     const handleClickForChannel = (channel) => {
+        dispatch(clearPosts());
         dispatch(selectChannel(channel));
         dispatch(fetchVideoPosts(channel));
     }

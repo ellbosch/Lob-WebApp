@@ -24,6 +24,15 @@ export const selectChannel = (channel) => {
     }
 }
 
+// clear posts (when we select a new channel)
+export const CLEAR_POSTS = 'CLEAR_POSTS';
+
+export const clearPosts = () => {
+    return {
+        type: CLEAR_POSTS
+    }
+}
+
 // action for requesting video posts
 export const REQUEST_POSTS = 'REQUEST_POSTS';
 
@@ -37,20 +46,23 @@ const requestPosts = (channel) => {
 // action for receiving posts
 export const RECEIVE_POSTS = 'RECEIVE_POSTS';
 
-const receivePosts = (channel, json) => {
+const receivePosts = (channel, items) => {
   return {
         type: RECEIVE_POSTS,
         channel,
-        items: json.results,
+        items,
         receivedAt: Date.now()
     }
 }
 
 // fetches videos given a specified channel and page
-export function fetchVideoPosts(channel, page=0) {
-    return function(dispatch) {
+export function fetchVideoPosts(channel) {
+    return function(dispatch, getState) {
         // inform app state that api call is starting
         dispatch(requestPosts(channel));
+
+        // get page for pagination
+        const page = getState().videoPostsByChannel.page;
 
         const apiPath = (channel !== '') ? '/api/v1/posts?channel=' + channel + '&page=' + page : 'api/v1/posts';
 
@@ -59,9 +71,13 @@ export function fetchVideoPosts(channel, page=0) {
                 res => res.json(),
                 error => console.log('An error occurred.', error)
             )
-            .then(result => {
+            .then(json => {
+                const currentItems = getState().videoPostsByChannel.items;
+
+                // append new results to current state of videos
+                const items = [...currentItems, ...json.results]
                 // update app state with results
-                dispatch(receivePosts(channel, result))
+                dispatch(receivePosts(channel, items))
             })
     }
 }
