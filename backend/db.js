@@ -7,6 +7,7 @@ const sequelize = new Sequelize(process.env.RDS_DB, process.env.RDS_USERNAME, pr
     dialect     : 'mysql',
     host        : process.env.RDS_HOSTNAME,
     port        : process.env.RDS_PORT,
+    logging     : false,
     define      : {
         charset: process.env.RDS_CHARSET,
         freezeTableName: true
