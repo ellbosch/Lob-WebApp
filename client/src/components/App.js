@@ -16,7 +16,7 @@ const App = () => {
     return (
         <div className="container">
             <h1>Hello</h1>
-            <ChannelNav channels={['NBA', 'NFL']} />
+            <ChannelNav channels={['Baseball', 'NBA', 'NFL']} />
             <VideoPostList />
         </div>
     );
