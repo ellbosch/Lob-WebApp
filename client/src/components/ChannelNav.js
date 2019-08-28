@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import ChannelLink from '../containers/ChannelLink';
+import ChannelLink from './ChannelLink';
 import { VisibilityFilters, clearPosts, selectChannel, selectAllChannels, fetchVideoPosts } from '../actions';
 
 const ChannelNav = ({channels}) => {
