@@ -1,8 +1,15 @@
+const AWS = require('aws-sdk');
 const bodyParser = require('body-parser');
 const express = require('express');
 const fetch = require('node-fetch');
 const path = require('path');
 const { VideoPost } = require('./db');
+
+// dynamodb connection details
+AWS.config.update({
+    region: "us-west-2"
+});
+const docClient = new AWS.DynamoDB.DocumentClient();
 
 // express configuration
 const app = express();
@@ -31,11 +38,24 @@ const getPosts1 = (req, res) => {
             res.json({ results: videoPosts })
         });
     } else {
-        fetch('https://lob.tv/api/v1/posts?page=1&sort=trending')
-        .then(res => res.json())
-        .then(json => res.send(json));
-    }
+        const params = {
+            TableName: 'lobHotPostsByLeague'
+        };
 
+        docClient.scan(params, function(err, data) {
+            if (err) {
+                console.error("Unable to get item. Error JSON:", JSON.stringify(err, null, 2));
+            } else {
+                // flatten items into 1d sorted array
+                const allItems = data["Items"]
+                    .map(obj => obj.posts)
+                    .reduce((prev, current) => prev.concat(current))
+                    .sort((a, b) => b.hot_score - a.hot_score);
+
+                res.json({ results: allItems });
+            }
+        });
+    }
 }
 
 // routers for different api versions
