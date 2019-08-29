@@ -7,11 +7,8 @@
     "start": "concurrently \"cd backend && node server.js\" \"cd client && npm start\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ellbosch/Lob.git"
-  },
-  "author": "",
+  "repository": "git+https://github.com/ellbosch/Lob.git",
+  "author": "ellbosch <elliot.boschwitz@gmail.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/ellbosch/Lob/issues"
@@ -20,6 +17,7 @@
   "dependencies": {
     "backend": "file:backend",
     "client": "file:client",
-    "concurrently": "^4.1.2"
+    "concurrently": "^4.1.2",
+    "typescript": "^3.6.2"
   }
 }
