@@ -87,7 +87,7 @@ v1.use('/posts', express.Router()
 // v0 versioning here
 
 // api versioning paths
-app.use('/api/v1.1', v1);
+// app.use('/api/v1.1', v1_1);
 app.use('/api/v1', v1);
 app.use('/', v0);
 

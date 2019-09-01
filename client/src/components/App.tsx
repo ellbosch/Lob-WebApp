@@ -5,7 +5,7 @@ import ChannelNav from './ChannelNav';
 import VideoPostList from './VideoPostList';
 
 const App: React.FC = () => {
-  const dispatch = useDispatch();
+    const dispatch = useDispatch();
 
     // fetches trending video posts on first load
     useEffect(() => {

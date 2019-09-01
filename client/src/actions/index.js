@@ -69,6 +69,7 @@ export function fetchVideoPosts(channel) {
         return fetch(apiPath)
             .then(
                 res => res.json(),
+                res => res,
                 error => console.log('An error occurred.', error)
             )
             .then(json => {
